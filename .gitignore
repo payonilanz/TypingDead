@@ -1,0 +1,17 @@
+# Build output
+bin/
+obj/
+
+# Generated executables and config copies
+/TypingDead.exe
+/TypingDead.exe.config
+*.pdb
+*.dll
+
+# Test output
+selftest-results.txt
+
+# User-specific files
+*.user
+*.suo
+.vs/

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6E3A2B9A-9C2F-4A61-8D5E-7B1F04B7C1A2}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>TypingDead</RootNamespace>
+    <AssemblyName>TypingDead</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Effects\ChargeEffect.cs" />
+    <Compile Include="Effects\CombatEffects.cs" />
+    <Compile Include="Effects\EffectManager.cs" />
+    <Compile Include="Effects\Particle.cs" />
+    <Compile Include="Effects\VisualEffect.cs" />
+    <Compile Include="Entities\Enemy.cs" />
+    <Compile Include="Entities\EnemyType.cs" />
+    <Compile Include="Entities\Player.cs" />
+    <Compile Include="Entities\Projectile.cs" />
+    <Compile Include="Entities\RunnerEnemy.cs" />
+    <Compile Include="Entities\SpecialZombie.cs" />
+    <Compile Include="Entities\TankEnemy.cs" />
+    <Compile Include="Entities\WalkerEnemy.cs" />
+    <Compile Include="Forms\DifficultyPanel.cs" />
+    <Compile Include="Forms\GamePanel.cs" />
+    <Compile Include="Forms\MainForm.cs" />
+    <Compile Include="Forms\MainMenuPanel.cs" />
+    <Compile Include="Forms\ResultPanel.cs" />
+    <Compile Include="Forms\SettingsPanel.cs" />
+    <Compile Include="Forms\TutorialPanel.cs" />
+    <Compile Include="Game\DifficultySettings.cs" />
+    <Compile Include="Game\GameConfig.cs" />
+    <Compile Include="Game\GameManager.cs" />
+    <Compile Include="Game\GameResult.cs" />
+    <Compile Include="Game\GameSettings.cs" />
+    <Compile Include="Game\GameState.cs" />
+    <Compile Include="Game\ProgressionManager.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rendering\DrawingHelper.cs" />
+    <Compile Include="Rendering\GameRenderer.cs" />
+    <Compile Include="Systems\AudioManager.cs" />
+    <Compile Include="Systems\HighScoreManager.cs" />
+    <Compile Include="Systems\InputHandler.cs" />
+    <Compile Include="Systems\ScoreManager.cs" />
+    <Compile Include="Systems\SettingsManager.cs" />
+    <Compile Include="Systems\SpawnManager.cs" />
+    <Compile Include="Systems\WordManager.cs" />
+    <Compile Include="Tests\SelfTest.cs" />
+    <Compile Include="UI\NeonAction.cs" />
+    <Compile Include="UI\PixelBackground.cs" />
+    <Compile Include="UI\Theme.cs" />
+    <Compile Include="UI\VirtualScreenPanel.cs" />
+    <Compile Include="Program.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="app.manifest" />
+    <None Include="Assets\README.txt" />
+    <None Include="build.bat" />
+    <None Include="README.md" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
