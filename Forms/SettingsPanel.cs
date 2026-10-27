@@ -36,18 +36,18 @@ namespace TypingDead.Forms
         {
             _manager = manager;
             _heading = UiFonts.Display(36f, FontStyle.Bold);
-            _rowTitle = UiFonts.Display(12.5f, FontStyle.Bold);
-            _small = UiFonts.Mono(7.5f, FontStyle.Regular);
+            _rowTitle = UiFonts.Display(15f, FontStyle.Bold);
+            _small = UiFonts.Mono(9f, FontStyle.Regular);
 
             _rows = new RectangleF[RowCount];
             for (int i = 0; i < RowCount; i++)
             {
-                _rows[i] = new RectangleF(90f, 200f + i * 70f, 1100f, 50f);
+                _rows[i] = new RectangleF(90f, 164f + i * 114f, 1100f, 96f);
             }
 
-            _reset = new NeonAction("RESET DEFAULTS", new RectangleF(90f, 548f, 330f, 46f));
+            _reset = new NeonAction("RESET DEFAULTS", new RectangleF(110f, 510f, 500f, 52f));
             _reset.Accent = Palette.Amber;
-            _back = new NeonAction("BACK", new RectangleF(460f, 548f, 330f, 46f));
+            _back = new NeonAction("BACK", new RectangleF(670f, 510f, 500f, 52f));
             _back.Primary = true;
             _back.Hint = "ESC";
 
@@ -103,13 +103,20 @@ namespace TypingDead.Forms
             {
                 DrawingHelper.DrawText(g, _feedback, UiFonts.Mono(8f, FontStyle.Bold),
                     Palette.Alpha(_feedbackColour, (int)(230 * Math.Min(1f, _feedbackTime * 2f))),
-                    new RectangleF(90f, 604f, 620f, 14f),
+                    new RectangleF(90f, 578f, 1100f, 16f),
                     StringAlignment.Center, StringAlignment.Center);
             }
             else if (!String.IsNullOrEmpty(_manager.LastError))
             {
                 DrawingHelper.DrawText(g, _manager.LastError, UiFonts.Mono(8f, FontStyle.Bold),
-                    Palette.DangerRed, new RectangleF(90f, 604f, 620f, 14f),
+                    Palette.DangerRed, new RectangleF(90f, 578f, 1100f, 16f),
+                    StringAlignment.Center, StringAlignment.Center);
+            }
+            else
+            {
+                DrawingHelper.DrawText(g, "CHANGES SAVE AUTOMATICALLY",
+                    UiFonts.Mono(8f, FontStyle.Regular), Palette.Alpha(Palette.MutedBlue, 150),
+                    new RectangleF(90f, 578f, 1100f, 16f),
                     StringAlignment.Center, StringAlignment.Center);
             }
 
@@ -147,13 +154,13 @@ namespace TypingDead.Forms
                 Palette.Alpha(accent, focused ? (byte)220 : (byte)(hovered ? 150 : 88)),
                 focused ? 2f : 1f), rect.X, rect.Y, rect.Width, rect.Height);
             g.FillRectangle(DrawingHelper.Brush(Palette.Alpha(accent, focused ? (byte)235 : (byte)105)),
-                rect.X, rect.Y + 10f, 5f, rect.Height - 20f);
+                rect.X, rect.Y + 18f, 5f, rect.Height - 36f);
 
             DrawingHelper.DrawText(g, title, _rowTitle, focused ? Palette.FrostWhite : Color.FromArgb(220, 234, 245),
-                new RectangleF(rect.X + 17f, rect.Y + 6f, 440f, 22f),
+                new RectangleF(rect.X + 22f, rect.Y + 18f, 560f, 30f),
                 StringAlignment.Near, StringAlignment.Center);
             DrawingHelper.DrawText(g, description, _small, Palette.Alpha(Palette.MutedBlue, 195),
-                new RectangleF(rect.X + 17f, rect.Y + 25f, 500f, 16f),
+                new RectangleF(rect.X + 22f, rect.Y + 52f, 600f, 20f),
                 StringAlignment.Near, StringAlignment.Center);
 
             if (segmentedValue != null)
@@ -162,11 +169,11 @@ namespace TypingDead.Forms
             }
             else
             {
-                DrawToggle(g, new RectangleF(rect.Right - 83f, rect.Y + 13f, 64f, 24f), toggleValue, accent);
+                DrawToggle(g, new RectangleF(rect.Right - 104f, rect.Y + 32f, 80f, 32f), toggleValue, accent);
                 DrawingHelper.DrawText(g, toggleValue ? "ON" : "OFF",
-                    UiFonts.Mono(7.5f, FontStyle.Bold),
+                    UiFonts.Mono(9f, FontStyle.Bold),
                     toggleValue ? Palette.ToxicGreen : Palette.MutedBlue,
-                    new RectangleF(rect.Right - 142f, rect.Y + 15f, 50f, 18f),
+                    new RectangleF(rect.Right - 190f, rect.Y + 38f, 76f, 22f),
                     StringAlignment.Far, StringAlignment.Center);
             }
         }
@@ -178,28 +185,34 @@ namespace TypingDead.Forms
             g.DrawRectangle(DrawingHelper.Pen(
                 Palette.Alpha(value ? accent : Palette.MutedBlue, value ? (byte)220 : (byte)120),
                 2f), rect.X, rect.Y, rect.Width, rect.Height);
-            float knobX = value ? rect.Right - 21f : rect.X + 3f;
+            float knobX = value ? rect.Right - 27f : rect.X + 4f;
             Color knob = value ? accent : Palette.MutedBlue;
-            g.FillRectangle(DrawingHelper.Brush(knob), knobX, rect.Y + 3f, 18f, 18f);
+            g.FillRectangle(DrawingHelper.Brush(knob), knobX, rect.Y + 4f, 24f, 24f);
             g.FillRectangle(DrawingHelper.Brush(Palette.PrimaryText),
-                knobX + 5f, rect.Y + 7f, 7f, 4f);
+                knobX + 7f, rect.Y + 10f, 10f, 4f);
+        }
+
+        private static RectangleF QualitySelectorRect(RectangleF row)
+        {
+            return new RectangleF(row.Right - 330f, row.Y + 32f, 310f, 32f);
         }
 
         private void DrawQualitySelector(Graphics g, RectangleF row, Color accent)
         {
-            RectangleF segmented = new RectangleF(row.Right - 275f, row.Y + 12f, 258f, 27f);
+            RectangleF segmented = QualitySelectorRect(row);
             DrawingHelper.FillRounded(g, segmented, Color.FromArgb(80, 6, 11, 18), 5f);
             string[] labels = new string[] { "LOW", "MED", "HIGH" };
+            float partWidth = segmented.Width / 3f;
             for (int i = 0; i < 3; i++)
             {
-                RectangleF part = new RectangleF(segmented.X + i * 86f, segmented.Y, 86f, segmented.Height);
+                RectangleF part = new RectangleF(segmented.X + i * partWidth, segmented.Y, partWidth, segmented.Height);
                 bool active = (int)Settings.EffectsQuality == i;
                 if (active)
                 {
                     DrawingHelper.FillRounded(g, part, Palette.Alpha(accent, 55), 4f);
                     DrawingHelper.DrawRounded(g, part, Palette.Alpha(accent, 170), 1f, 4f);
                 }
-                DrawingHelper.DrawCentered(g, labels[i], UiFonts.Mono(7.5f, FontStyle.Bold),
+                DrawingHelper.DrawCentered(g, labels[i], UiFonts.Mono(9f, FontStyle.Bold),
                     active ? Palette.FrostWhite : Palette.MutedBlue, part);
             }
         }
@@ -346,8 +359,9 @@ namespace TypingDead.Forms
                     _focusIndex = i;
                     if (i == 2)
                     {
-                        RectangleF segmented = new RectangleF(_rows[i].Right - 275f, _rows[i].Y + 12f, 258f, 27f);
-                        int part = (int)((point.X - segmented.X) / 86f);
+                        RectangleF segmented = QualitySelectorRect(_rows[i]);
+                        float partWidth = segmented.Width / 3f;
+                        int part = (int)((point.X - segmented.X) / partWidth);
                         if (part < 0) part = 0;
                         if (part > 2) part = 2;
                         Settings.EffectsQuality = (EffectsQuality)part;

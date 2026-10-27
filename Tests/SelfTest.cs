@@ -667,6 +667,19 @@ namespace TypingDead.Tests
             Check("Personal best is capped at 100", best.Get(GameDifficulty.Easy) == 100);
             best.Set(GameDifficulty.Easy, -5);
             Check("Personal best cannot go below zero", best.Get(GameDifficulty.Easy) == 0);
+
+            Check("A new score table has no best time",
+                best.GetTimeMs(GameDifficulty.Easy) == 0 &&
+                best.GetTimeMs(GameDifficulty.Medium) == 0 &&
+                best.GetTimeMs(GameDifficulty.Hard) == 0);
+            best.SetTimeMs(GameDifficulty.Easy, 90500);
+            Check("Best time stores milliseconds", best.GetTimeMs(GameDifficulty.Easy) == 90500);
+            Check("Best time formats as minutes and seconds",
+                HighScoreManager.FormatTime(90500) == "01:30");
+            Check("Unset best time shows a placeholder",
+                HighScoreManager.FormatTime(0) == "--:--");
+            best.SetTimeMs(GameDifficulty.Easy, -50);
+            Check("Best time cannot go below zero", best.GetTimeMs(GameDifficulty.Easy) == 0);
             Log.AppendLine();
         }
 

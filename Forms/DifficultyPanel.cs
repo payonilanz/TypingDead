@@ -204,14 +204,17 @@ namespace TypingDead.Forms
             DifficultySettings tuning = DifficultySettings.Create(difficulty);
             DrawingHelper.DrawText(g, tuning.Description,
                 UiFonts.Body(13f, FontStyle.Regular), Palette.PrimaryText,
-                new RectangleF(card.X + 20f, card.Y + 122f, card.Width - 40f, 52f),
+                new RectangleF(card.X + 20f, card.Y + 116f, card.Width - 40f, 34f),
                 StringAlignment.Near, StringAlignment.Near);
 
-            DrawInfoRow(g, card, 184f, "ENEMIES", tuning.ZombieSummary, accent);
-            DrawInfoRow(g, card, 232f, "CHARS", tuning.MinimumWordLength.ToString() + "-" +
+            DrawInfoRow(g, card, 158f, "ENEMIES", tuning.ZombieSummary, accent);
+            DrawInfoRow(g, card, 196f, "CHARS", tuning.MinimumWordLength.ToString() + "-" +
                 tuning.MaximumWordLength.ToString(), accent);
-            DrawInfoRow(g, card, 280f, "BEST",
+            DrawInfoRow(g, card, 234f, "BEST",
                 completed ? "COMPLETED" : _highScores.GetBest(difficulty).ToString("000") + " / 100",
+                accent);
+            DrawInfoRow(g, card, 272f, "BEST TIME",
+                HighScoreManager.FormatTime(_highScores.GetBestTimeMs(difficulty)),
                 accent);
 
             string status;
@@ -233,7 +236,7 @@ namespace TypingDead.Forms
             }
             DrawingHelper.DrawText(g, status, UiFonts.Mono(8.5f, FontStyle.Bold),
                 unlocked ? Palette.Success : Palette.Blood,
-                new RectangleF(card.X + 20f, card.Y + 318f, card.Width - 40f, 18f),
+                new RectangleF(card.X + 20f, card.Y + 304f, card.Width - 40f, 18f),
                 StringAlignment.Near, StringAlignment.Center);
 
             if (!unlocked)

@@ -13,6 +13,9 @@ namespace TypingDead.Systems
         [DataMember(Name = "easy")] public int Easy { get; set; }
         [DataMember(Name = "medium")] public int Medium { get; set; }
         [DataMember(Name = "hard")] public int Hard { get; set; }
+        [DataMember(Name = "easyTimeMs")] public int EasyTimeMs { get; set; }
+        [DataMember(Name = "mediumTimeMs")] public int MediumTimeMs { get; set; }
+        [DataMember(Name = "hardTimeMs")] public int HardTimeMs { get; set; }
 
         public int Get(GameDifficulty difficulty)
         {
@@ -33,6 +36,27 @@ namespace TypingDead.Systems
                 case GameDifficulty.Easy: Easy = value; break;
                 case GameDifficulty.Medium: Medium = value; break;
                 default: Hard = value; break;
+            }
+        }
+
+        public int GetTimeMs(GameDifficulty difficulty)
+        {
+            switch (difficulty)
+            {
+                case GameDifficulty.Easy: return EasyTimeMs;
+                case GameDifficulty.Medium: return MediumTimeMs;
+                default: return HardTimeMs;
+            }
+        }
+
+        public void SetTimeMs(GameDifficulty difficulty, int value)
+        {
+            if (value < 0) value = 0;
+            switch (difficulty)
+            {
+                case GameDifficulty.Easy: EasyTimeMs = value; break;
+                case GameDifficulty.Medium: MediumTimeMs = value; break;
+                default: HardTimeMs = value; break;
             }
         }
     }
@@ -73,6 +97,38 @@ namespace TypingDead.Systems
             Data.Set(difficulty, score);
             Save();
             return true;
+        }
+
+        /// <summary>Fastest completed run for the mode, or zero when unset.</summary>
+        public int GetBestTimeMs(GameDifficulty difficulty)
+        {
+            int best = Data.GetTimeMs(difficulty);
+            return best > 0 ? best : 0;
+        }
+
+        /// <summary>Records a completed run when it is faster than the best.</summary>
+        public bool ReportTime(GameDifficulty difficulty, TimeSpan duration)
+        {
+            if (duration <= TimeSpan.Zero) return false;
+            int candidate = (int)Math.Min((double)Int32.MaxValue,
+                Math.Round(duration.TotalMilliseconds));
+            if (candidate < 1) candidate = 1;
+
+            int current = Data.GetTimeMs(difficulty);
+            if (current > 0 && candidate >= current) return false;
+
+            Data.SetTimeMs(difficulty, candidate);
+            Save();
+            return true;
+        }
+
+        public static string FormatTime(int milliseconds)
+        {
+            if (milliseconds <= 0) return "--:--";
+            int totalSeconds = milliseconds / 1000;
+            int minutes = totalSeconds / 60;
+            int seconds = totalSeconds % 60;
+            return minutes.ToString("00") + ":" + seconds.ToString("00");
         }
 
         private void Save()

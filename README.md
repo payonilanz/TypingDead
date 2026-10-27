@@ -23,7 +23,7 @@ All artwork, effects, and audio are generated at runtime. There are no image fil
 - Pixel-art battlefield, HUD, effects, menus, and result screens.
 - Compact, short-phrase interface text.
 - Music across menus and non-gameplay screens, silenced only during a run.
-- Built-in headless test suite: **172 checks, 0 failures**.
+- Built-in headless test suite: **177 checks, 0 failures**.
 
 ---
 
@@ -75,7 +75,7 @@ The test harness runs headlessly, writes `selftest-results.txt` beside the execu
 Current verified result:
 
 ```text
-CHECKS PASSED: 172
+CHECKS PASSED: 177
 CHECKS FAILED: 0
 RESULT: PASS
 ```
@@ -147,7 +147,7 @@ Submission rules:
 - Runners are single-hit enemies in every mode, including Hard: one correct word submission defeats them.
 - Hard mode contains **no Tanks and no Specials**. It replaces them with multiple longer-word Runners, so every Hard kill is a single-word, single-hit Runner or Walker.
 - The score is clamped at **100**.
-- Each program launch starts the score display at **0**; personal bests are session-only and reset when the game is restarted.
+- Each program launch starts the score display at **0**; personal bests and best times are session-only and reset when the game is restarted.
 - When the player reaches 100 points, the mode completes immediately for scoring purposes. No more rewards or completion events are accepted after success.
 - All three modes are configured for **100 points**, not 500 and not multiple levels.
 
@@ -189,7 +189,8 @@ Progression rules:
 - Any failed run resets progression to **Easy only**.
 - Easy always remains available.
 - Completed modes remain replayable.
-- Progression is intentionally **session-only**. Starting the application creates a fresh Easy-only progression and a zero score display. Settings still persist on disk; personal bests reset each launch.
+- Each completed run records its duration. The fastest completion per mode appears as `BEST TIME` on the mode card, formatted as `MM:SS`; unset times show `--:--`.
+- Progression is intentionally **session-only**. Starting the application creates a fresh Easy-only progression, a zero score display, and no best times. Settings still persist on disk; personal bests and best times reset each launch.
 
 ### Hard mode guarantee
 
@@ -208,11 +209,11 @@ Hard-mode word assignment does not merely offer long words. **Every word assigne
 ## Screens
 
 - **Main Menu** — Play, How to Play, Settings, Exit Game, and the exact group footer `J. Francia // K. Galay // L. Garcia // C. Hernandez`.
-- **Difficulty Selection** — three mode cards with lock state, completion state, best score, tuning summary, and working Play/Replay buttons. `BEST` reads `COMPLETED` after a cleared mode.
+- **Difficulty Selection** — three mode cards with lock state, completion state, best score, best completion time, tuning summary, and working Play/Replay buttons. `BEST` reads `COMPLETED` after a cleared mode; `BEST TIME` shows the fastest completed run or `--:--`.
 - **Gameplay** — pixel HUD, three lanes, targeted word tags, Tank segments, typing console, word-ready state, and status feedback.
 - **Pause** — Resume, Restart, Settings, Main Menu. The run freezes underneath.
-- **Settings** — sound effects, music, and graphics quality. Changes save immediately.
-- **How to Play** — controls, Enter-to-attack rules, zombie types, Tank mechanics, modes, unlocks, and reset rules.
+- **Settings** — large full-width rows for sound effects, music, and graphics quality. Changes save immediately.
+- **How to Play** — a full-screen reference for controls, Enter-to-attack rules, zombie types, Tank mechanics, modes, unlocks, and reset rules.
 - **Mode Completion** — success report, `COMPLETED` in place of `100/100`, stats, and a replay option.
 - **Game Over** — failure report and Retry/Main Menu.
 - **Final Victory** — the all-modes-cleared ending and a fresh-start option.
@@ -297,7 +298,7 @@ TypingDead/
     PixelBackground.cs       Shared pixel-art background
 
   Tests/
-    SelfTest.cs              172-check headless rules verification
+    SelfTest.cs              177-check headless rules verification
 ```
 
 There are no `.Designer.cs` files and no `TextBox` controls. Every screen is custom-painted on a `VirtualScreenPanel`.
@@ -369,14 +370,14 @@ The four exact comments are present in the source:
 
 ## Persistence
 
-Settings and personal bests are stored under:
+The game writes these files under:
 
 ```text
 %AppData%\TypingDead\settings.json
 %AppData%\TypingDead\highscores.json
 ```
 
-Missing or invalid files fall back to defaults. High scores are kept separately for Easy, Medium, and Hard, and every personal best is capped at **100** to match the one-run score limit.
+`settings.json` persists across launches. `highscores.json` is written while the current session runs but is intentionally **not loaded at startup**, so personal bests and best times begin at zero on every launch. Best scores are kept separately for Easy, Medium, and Hard, capped at **100**, and best times are stored in milliseconds for each mode.
 
 Progression is deliberately kept in memory for the current application session. Closing and reopening the game returns to a fresh **Easy-only** state.
 
@@ -440,10 +441,10 @@ The final pass also fixed two layout issues found in those captures: a misplaced
 - **Windows only.** WinForms and GDI+.
 - **Latin typing only.** Input is mapped from A-Z plus a single Space between words. IME composition, dead keys, and non-Latin scripts are not supported.
 - **Fixed virtual resolution.** The 1280x720 canvas scales and letterboxes rather than reflowing.
-- **Session-only progression.** Unlocks reset on a fresh launch; settings and personal bests persist.
+- **Session-only progression and records.** Unlocks, personal bests, and best times reset on a fresh launch; settings persist.
 - **No online services.** No account, cloud sync, or online leaderboard.
 - **No mid-run save.** Pause freezes the current run; closing the application ends it.
-- **Simple audio backend.** `SoundPlayer` is used instead of a full mixer.
+- **Simple audio backend.** `SoundPlayer` handles sound effects while a separate MCI channel plays looping music.
 - **Targeting-pack note.** The build machine lacks the .NET Framework 4.8 Developer Pack, so MSBuild 4.0 compiled against GAC assemblies and printed reference-assembly warnings. The executable was built, launched, exercised, and self-tested successfully.
 - **Unsigned executable.** Windows SmartScreen may ask for confirmation.
 
@@ -452,8 +453,8 @@ The final pass also fixed two layout issues found in those captures: a misplaced
 ## Reset and troubleshooting
 
 - Delete `%AppData%\TypingDead\settings.json` to reset settings.
-- Delete `%AppData%\TypingDead\highscores.json` to reset personal bests.
-- Delete the whole `%AppData%\TypingDead` folder to reset both.
+- Best scores and best times are session-only; `highscores.json` is not loaded on startup.
+- Delete the whole `%AppData%\TypingDead` folder to reset settings and the saved session file.
 - If audio is silent, check the in-game Settings toggles and the Windows playback device.
 - If the game pauses unexpectedly, another window took focus. This is intentional and prevents breaches while you are away.
 - If a build cannot replace the root executable, close any running copy and run `build.bat` again.

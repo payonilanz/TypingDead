@@ -39,19 +39,21 @@ namespace TypingDead.Forms
                 new RectangleF(0f, 72f, GameConfig.VirtualWidth, 20f),
                 StringAlignment.Center, StringAlignment.Center);
 
-            DrawSection(g, new RectangleF(44f, 112f, 568f, 238f),
+            DrawSection(g, new RectangleF(44f, 112f, 568f, 250f),
                 "MOVE AND SURVIVE", Palette.Success, new string[]
                 {
                     "Three lanes. UP/DOWN or W/S moves.",
                     "",
-                    "Nearest zombie in your lane is auto-targeted.",
+                    "The nearest zombie in your lane is",
+                    "targeted automatically.",
                     "",
-                    "Breach or wrong word: -1 life.",
+                    "A breach or wrong word costs 1 life.",
+                    "Empty Enter is always safe.",
                     "",
                     "Reach 100 points to clear the mode."
                 });
 
-            DrawSection(g, new RectangleF(668f, 112f, 568f, 238f),
+            DrawSection(g, new RectangleF(668f, 112f, 568f, 250f),
                 "TYPE. PRESS ENTER.", Palette.Warning, new string[]
                 {
                     "Type with A-Z. Use SPACE between words.",
@@ -61,18 +63,22 @@ namespace TypingDead.Forms
                     "Press ENTER once to attack.",
                     "",
                     "Empty ENTER: TYPE A WORD FIRST (safe).",
-                    "Wrong word: -1 life."
+                    "Wrong word: -1 life.",
+                    "",
+                    "Repeated ENTER cannot duplicate an attack."
                 });
 
             DrawSection(g, new RectangleF(44f, 370f, 568f, 250f),
                 "ENEMIES", Palette.Blood, new string[]
                 {
                     "WALKER  -  slow, one word, 10 points.",
-                    "RUNNER  -  fast, one word, long terms.",
+                    "RUNNER  -  fast, one word, 10 points.",
                     "TANK    -  3 words, 3 health segments.",
                     "           Points only after hit 3.",
                     "",
                     "HARD    -  Runner waves with long terms.",
+                    "No Tanks or Specials in Hard mode.",
+                    "",
                     "Lane changes keep word and health progress."
                 });
 
@@ -85,7 +91,9 @@ namespace TypingDead.Forms
                     "",
                     "Start with Easy only. Clear a mode to unlock",
                     "the next. Failure resets unlocks to Easy.",
-                    "Completed modes can be replayed."
+                    "Completed modes can be replayed.",
+                    "",
+                    "Best time is tracked for each mode."
                 });
 
             DrawControlStrip(g, 262f, 632f, 974f, 48f);
@@ -110,10 +118,16 @@ namespace TypingDead.Forms
                 rect.X + 20f, rect.Y + 43f, rect.Width - 40f, 1f);
 
             Font body = UiFonts.Mono(10.5f, FontStyle.Regular);
+            float bodyTop = rect.Y + 54f;
+            float bodyBottom = rect.Bottom - 16f;
+            float available = Math.Max(1f, bodyBottom - bodyTop);
+            float spacing = Math.Min(24f, available / Math.Max(1, lines.Length));
+            float blockHeight = spacing * lines.Length;
+            float startY = bodyTop + Math.Max(0f, (available - blockHeight) * 0.5f);
             for (int i = 0; i < lines.Length; i++)
             {
                 DrawingHelper.DrawText(g, lines[i], body, Palette.PrimaryText,
-                    new RectangleF(rect.X + 22f, rect.Y + 53f + i * 19f, rect.Width - 44f, 18f),
+                    new RectangleF(rect.X + 22f, startY + i * spacing, rect.Width - 44f, 18f),
                     StringAlignment.Near, StringAlignment.Center);
             }
         }

@@ -148,6 +148,12 @@ namespace TypingDead.Forms
             _game.StopSession();
 
             bool newBest = _highScores.Report(result.Difficulty, result.Score);
+            if (result.ModeCompleted)
+            {
+                // Only completed runs earn a best time. A faster replay also
+                // counts as a new record on the result screen.
+                newBest = _highScores.ReportTime(result.Difficulty, result.Duration) || newBest;
+            }
 
             string notice;
             ResultKind kind;
