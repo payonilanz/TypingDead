@@ -468,21 +468,22 @@ namespace TypingDead.Game
             Enemy previous = _player.Target;
             _player.ValidateTarget();
 
-            if (_player.Target == null)
+            // Target lock always points at the closest living enemy in the
+            // player's lane. If a nearer zombie arrives, the lock moves to it
+            // automatically; stale typing is cleared by AssignTarget.
+            Enemy nearest = FindNearestTarget(_player.Lane);
+            if (nearest != null && _player.Target != nearest)
             {
-                Enemy nearest = FindNearestTarget(_player.Lane);
-                if (nearest != null)
+                bool shouldSwitch = _player.Target == null || nearest.X < _player.Target.X;
+                if (shouldSwitch && _player.AssignTarget(nearest))
                 {
-                    if (_player.AssignTarget(nearest))
-                    {
-                        _wordHadMistake = false;
-                        _lastChargeMilestone = 0;
-                        _audio.Play(GameSound.TargetAcquired);
-                        SetStatus("TARGET // LANE " + (nearest.Lane + 1).ToString("00"),
-                            Palette.Success, 1.0f);
-                        if (TargetChanged != null) TargetChanged(this, EventArgs.Empty);
-                        return true;
-                    }
+                    _wordHadMistake = false;
+                    _lastChargeMilestone = 0;
+                    _audio.Play(GameSound.TargetAcquired);
+                    SetStatus("TARGET LOCK // LANE " + (nearest.Lane + 1).ToString("00"),
+                        Palette.Success, 1.0f);
+                    if (TargetChanged != null) TargetChanged(this, EventArgs.Empty);
+                    return true;
                 }
             }
 

@@ -185,7 +185,10 @@ namespace TypingDead.Forms
                 new RectangleF(scoreBox.X + 24f, scoreBox.Y + 14f, 220f, 14f),
                 StringAlignment.Near, StringAlignment.Center);
             int score = _result == null ? 0 : _result.Score;
-            DrawingHelper.DrawText(g, score.ToString("000") + " / 100", UiFonts.Display(38f, FontStyle.Bold),
+            string scoreText = _result != null && _result.ModeCompleted
+                ? "COMPLETED"
+                : score.ToString("000") + " / 100";
+            DrawingHelper.DrawText(g, scoreText, UiFonts.Display(38f, FontStyle.Bold),
                 accent, new RectangleF(scoreBox.X + 24f, scoreBox.Y + 29f, 360f, 48f),
                 StringAlignment.Near, StringAlignment.Center);
 

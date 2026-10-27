@@ -211,7 +211,8 @@ namespace TypingDead.Forms
             DrawInfoRow(g, card, 232f, "CHARS", tuning.MinimumWordLength.ToString() + "-" +
                 tuning.MaximumWordLength.ToString(), accent);
             DrawInfoRow(g, card, 280f, "BEST",
-                _highScores.GetBest(difficulty).ToString("000") + " / 100", accent);
+                completed ? "COMPLETED" : _highScores.GetBest(difficulty).ToString("000") + " / 100",
+                accent);
 
             string status;
             if (completed)

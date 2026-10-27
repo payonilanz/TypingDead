@@ -15,7 +15,6 @@ namespace TypingDead.Forms
     public sealed class MainMenuPanel : VirtualScreenPanel
     {
         private readonly AudioManager _audio;
-        private readonly HighScoreManager _highScores;
         private readonly NeonAction[] _actions;
         private readonly NeonAction[] _confirmActions;
         private int _focus;
@@ -29,10 +28,9 @@ namespace TypingDead.Forms
         public event EventHandler SettingsRequested;
         public event EventHandler ExitRequested;
 
-        public MainMenuPanel(AudioManager audio, HighScoreManager highScores)
+        public MainMenuPanel(AudioManager audio)
         {
             _audio = audio;
-            _highScores = highScores;
             _focus = 0;
 
             _actions = new NeonAction[]
@@ -106,26 +104,10 @@ namespace TypingDead.Forms
                 _actions[i].Draw(g, _focus == i, _hover == i, false, time);
             }
 
-            // Best score strip.
-            g.FillRectangle(DrawingHelper.Brush(Palette.Alpha(Palette.Shadow, 220)),
-                388f, 606f, 504f, 30f);
-            g.DrawRectangle(DrawingHelper.Pen(Palette.Alpha(Palette.Success, 105), 1f),
-                388f, 606f, 504f, 30f);
-            string best = "BEST  EASY " + _highScores.GetBest(GameDifficulty.Easy).ToString("000") +
-                "   MED " + _highScores.GetBest(GameDifficulty.Medium).ToString("000") +
-                "   HARD " + _highScores.GetBest(GameDifficulty.Hard).ToString("000");
-            DrawingHelper.DrawText(g, best, UiFonts.Mono(8f, FontStyle.Bold), Palette.SecondaryText,
-                new RectangleF(396f, 606f, 488f, 30f),
-                StringAlignment.Center, StringAlignment.Center);
-
             // Exact required footer label, centered.
             DrawingHelper.DrawText(g, GameConfig.GroupLabel,
                 UiFonts.Mono(9f, FontStyle.Bold), Palette.Alpha(Palette.PrimaryText, 220),
                 new RectangleF(0f, 673f, GameConfig.VirtualWidth, 22f),
-                StringAlignment.Center, StringAlignment.Center);
-            DrawingHelper.DrawText(g, GameConfig.Version, UiFonts.Mono(6.5f, FontStyle.Regular),
-                Palette.Alpha(Palette.SecondaryText, 150),
-                new RectangleF(0f, 699f, GameConfig.VirtualWidth, 14f),
                 StringAlignment.Center, StringAlignment.Center);
 
             if (_confirmExit)

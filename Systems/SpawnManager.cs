@@ -86,9 +86,9 @@ namespace TypingDead.Systems
                 return EnemyType.Walker;
             }
 
-            if (roll < 0.42) return EnemyType.Runner;
-            if (roll < 0.60) return EnemyType.Tank;
-            if (roll < 0.70) return EnemyType.Special;
+            // Hard mode replaces the old Tank and Special threats with a heavy
+            // Runner presence. Every Runner is a single-word, single-hit enemy.
+            if (roll < 0.70) return EnemyType.Runner;
             return EnemyType.Walker;
         }
 

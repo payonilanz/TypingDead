@@ -71,8 +71,8 @@ namespace TypingDead.Game
                 default:
                     settings.Name = "HARD";
                     settings.ShortImpact = "FINAL MODE";
-                    settings.Description = "Long terms, fast enemies and Specials.";
-                    settings.ZombieSummary = "RUNNERS + SPECIALS";
+                    settings.Description = "Long terms and relentless Runners.";
+                    settings.ZombieSummary = "RUNNERS + WALKERS";
                     settings.WalkerSpeed = 70f;
                     settings.RunnerSpeed = 122f;
                     settings.TankSpeed = 50f;

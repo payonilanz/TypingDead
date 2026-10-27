@@ -44,7 +44,7 @@ namespace TypingDead.Forms
                 {
                     "Three lanes. UP/DOWN or W/S moves.",
                     "",
-                    "Nearest zombie in your lane is the target.",
+                    "Nearest zombie in your lane is auto-targeted.",
                     "",
                     "Breach or wrong word: -1 life.",
                     "",
@@ -68,11 +68,11 @@ namespace TypingDead.Forms
                 "ENEMIES", Palette.Blood, new string[]
                 {
                     "WALKER  -  slow, one word, 10 points.",
-                    "RUNNER  -  fast, one word.",
+                    "RUNNER  -  fast, one word, long terms.",
                     "TANK    -  3 words, 3 health segments.",
                     "           Points only after hit 3.",
-                    "SPECIAL -  Hard mode, two long words.",
                     "",
+                    "HARD    -  Runner waves with long terms.",
                     "Lane changes keep word and health progress."
                 });
 
@@ -81,7 +81,7 @@ namespace TypingDead.Forms
                 {
                     "EASY    -  3-5 characters.",
                     "MEDIUM  -  5-9 characters.",
-                    "HARD    -  10+ characters.",
+                    "HARD    -  10-18 characters.",
                     "",
                     "Start with Easy only. Clear a mode to unlock",
                     "the next. Failure resets unlocks to Easy.",

@@ -217,6 +217,12 @@ namespace TypingDead.Entities
             return true;
         }
 
+        /// <summary>Positions an enemy for deterministic targeting tests.</summary>
+        internal void SetXForTest(float x)
+        {
+            _x = x;
+        }
+
         public void ReserveForAttack()
         {
             if (_state == EnemyState.Active)

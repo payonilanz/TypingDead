@@ -13,8 +13,8 @@ namespace TypingDead.Forms
     /// </summary>
     public sealed class SettingsPanel : VirtualScreenPanel
     {
-        private const int RowCount = 6;
-        private const int ItemCount = 8;
+        private const int RowCount = 3;
+        private const int ItemCount = 5;
 
         private readonly Systems.SettingsManager _manager;
         private readonly NeonAction _reset;
@@ -22,9 +22,7 @@ namespace TypingDead.Forms
         private readonly Font _heading;
         private readonly Font _rowTitle;
         private readonly Font _small;
-        private readonly Font _body;
         private readonly RectangleF[] _rows;
-        private readonly RectangleF _preview;
         private int _focusIndex;
         private int _hoverIndex;
         private float _feedbackTime;
@@ -40,14 +38,12 @@ namespace TypingDead.Forms
             _heading = UiFonts.Display(36f, FontStyle.Bold);
             _rowTitle = UiFonts.Display(12.5f, FontStyle.Bold);
             _small = UiFonts.Mono(7.5f, FontStyle.Regular);
-            _body = UiFonts.Body(9.5f, FontStyle.Regular);
 
             _rows = new RectangleF[RowCount];
             for (int i = 0; i < RowCount; i++)
             {
-                _rows[i] = new RectangleF(90f, 190f + i * 57f, 700f, 50f);
+                _rows[i] = new RectangleF(90f, 200f + i * 70f, 1100f, 50f);
             }
-            _preview = new RectangleF(822f, 190f, 368f, 405f);
 
             _reset = new NeonAction("RESET DEFAULTS", new RectangleF(90f, 548f, 330f, 46f));
             _reset.Accent = Palette.Amber;
@@ -100,9 +96,8 @@ namespace TypingDead.Forms
             DrawingHelper.DrawCornerBrackets(g, content, Palette.Alpha(Palette.Success, 180), 20f, 2f);
 
             DrawRows(g, time);
-            DrawPreview(g, time);
-            _reset.Draw(g, _focusIndex == 6, _hoverIndex == 6, false, time);
-            _back.Draw(g, _focusIndex == 7, _hoverIndex == 7, false, time);
+            _reset.Draw(g, _focusIndex == 3, _hoverIndex == 3, false, time);
+            _back.Draw(g, _focusIndex == 4, _hoverIndex == 4, false, time);
 
             if (_feedbackTime > 0f && !String.IsNullOrEmpty(_feedback))
             {
@@ -130,14 +125,8 @@ namespace TypingDead.Forms
                 Settings.SoundEnabled, null, time);
             DrawRow(g, 1, "MUSIC", "Ambient loop.",
                 Settings.MusicEnabled, null, time);
-            DrawRow(g, 2, "EFFECTS QUALITY", "Particle density.",
+            DrawRow(g, 2, "GRAPHICS", "Particle density.",
                 false, Settings.EffectsQuality.ToString().ToUpperInvariant(), time);
-            DrawRow(g, 3, "SCREEN SHAKE", "Shake on damage.",
-                Settings.ScreenShake, null, time);
-            DrawRow(g, 4, "TYPING PROGRESS", "Highlight typed letters.",
-                Settings.ShowTypingProgress, null, time);
-            DrawRow(g, 5, "REDUCED MOTION", "Less shake and motion.",
-                Settings.ReducedMotion, null, time);
         }
 
         private void DrawRow(Graphics g, int index, string title, string description, bool toggleValue,
@@ -146,10 +135,9 @@ namespace TypingDead.Forms
             RectangleF rect = _rows[index];
             bool focused = _focusIndex == index;
             bool hovered = _hoverIndex == index;
-            Color accent = index == 5 ? Palette.ElectricPurple : Palette.NeonCyan;
+            Color accent = Palette.NeonCyan;
             if (index == 0 || index == 1) accent = Palette.ToxicGreen;
             if (index == 2) accent = Palette.Amber;
-            if (index == 3) accent = Palette.Amber;
 
             g.FillRectangle(DrawingHelper.Brush(Palette.Shadow), rect.X + 4f, rect.Y + 4f, rect.Width, rect.Height);
             g.FillRectangle(DrawingHelper.Brush(focused
@@ -216,93 +204,6 @@ namespace TypingDead.Forms
             }
         }
 
-        private void DrawPreview(Graphics g, float time)
-        {
-            DrawingHelper.FillRounded(g, _preview, Color.FromArgb(204, 12, 20, 33), 8f);
-            DrawingHelper.DrawRounded(g, _preview, Palette.Alpha(Palette.DimCyan, 170), 1f, 8f);
-            DrawingHelper.DrawText(g, "PREVIEW", UiFonts.Display(13f, FontStyle.Bold),
-                Palette.NeonCyan, new RectangleF(_preview.X + 20f, _preview.Y + 17f, _preview.Width - 40f, 22f),
-                StringAlignment.Near, StringAlignment.Center);
-            DrawingHelper.DrawText(g, "Effect sample", _small,
-                Palette.Alpha(Palette.MutedBlue, 190),
-                new RectangleF(_preview.X + 20f, _preview.Y + 40f, _preview.Width - 40f, 15f),
-                StringAlignment.Near, StringAlignment.Center);
-
-            RectangleF screen = new RectangleF(_preview.X + 22f, _preview.Y + 65f, _preview.Width - 44f, 150f);
-            DrawingHelper.FillRounded(g, screen, Color.FromArgb(235, 6, 11, 18), 6f);
-            DrawingHelper.DrawRounded(g, screen, Palette.Alpha(Palette.DimCyan, 130), 1f, 6f);
-            DrawingHelper.DrawGrid(g, screen, Color.FromArgb(18, Palette.DimCyan), 22f, 0f);
-
-            float pulse = Settings.ReducedMotion ? 0.8f : 0.7f + 0.3f * (float)Math.Sin(time * 4f);
-            PointF core = new PointF(screen.X + 110f, screen.Y + 77f);
-            for (int i = 3; i >= 0; i--)
-            {
-                float radius = (8f + i * 8f) * (Settings.ReducedMotion ? 0.85f : pulse);
-                g.DrawRectangle(DrawingHelper.Pen(Palette.Alpha(Palette.Success, 40 + i * 16), 1f),
-                    (float)Math.Round(core.X - radius), (float)Math.Round(core.Y - radius),
-                    (float)Math.Round(radius * 2f), (float)Math.Round(radius * 2f));
-            }
-            g.FillRectangle(DrawingHelper.Brush(Palette.Success),
-                (float)Math.Round(core.X - 4f), (float)Math.Round(core.Y - 4f), 8f, 8f);
-            g.FillRectangle(DrawingHelper.Brush(Palette.PrimaryText),
-                (float)Math.Round(core.X - 2f), (float)Math.Round(core.Y - 2f), 4f, 4f);
-
-            if (!Settings.ReducedMotion)
-            {
-                int count = Settings.EffectsQuality == EffectsQuality.Low ? 5 :
-                    (Settings.EffectsQuality == EffectsQuality.Medium ? 10 : 18);
-                for (int i = 0; i < count; i++)
-                {
-                    double angle = time * (1.2 + i * 0.13) + i * 1.4;
-                    double distance = 28 + (i % 5) * 9;
-                    float x = core.X + (float)Math.Cos(angle) * (float)distance;
-                    float y = core.Y + (float)Math.Sin(angle) * (float)distance;
-                    g.FillRectangle(DrawingHelper.Brush(Palette.Alpha(i % 2 == 0 ? Palette.NeonCyan : Palette.ElectricPurple, 160)),
-                        x, y, 2f, 2f);
-                }
-            }
-
-            DrawingHelper.DrawText(g, "TARGET WORD", UiFonts.Mono(6.8f, FontStyle.Regular),
-                Palette.MutedBlue, new RectangleF(screen.X + 15f, screen.Bottom - 55f, 100f, 12f),
-                StringAlignment.Near, StringAlignment.Center);
-            DrawingHelper.DrawText(g, "SHADOW", UiFonts.Mono(18f, FontStyle.Bold),
-                Palette.FrostWhite, new RectangleF(screen.X + 15f, screen.Bottom - 44f, 170f, 28f),
-                StringAlignment.Near, StringAlignment.Center);
-            DrawingHelper.DrawText(g, "SHA___", UiFonts.Mono(10f, FontStyle.Bold),
-                Palette.NeonCyan, new RectangleF(screen.Right - 115f, screen.Bottom - 39f, 96f, 20f),
-                StringAlignment.Far, StringAlignment.Center);
-
-            float infoY = _preview.Y + 230f;
-            DrawingHelper.DrawText(g, "EFFECTS QUALITY", UiFonts.Mono(7f, FontStyle.Regular),
-                Palette.MutedBlue, new RectangleF(_preview.X + 20f, infoY, 160f, 14f),
-                StringAlignment.Near, StringAlignment.Center);
-            DrawingHelper.DrawText(g, Settings.EffectsQuality.ToString().ToUpperInvariant(),
-                UiFonts.Mono(10f, FontStyle.Bold), Palette.Amber,
-                new RectangleF(_preview.X + 20f, infoY + 16f, 160f, 18f),
-                StringAlignment.Near, StringAlignment.Center);
-
-            DrawingHelper.DrawText(g, "MOTION", UiFonts.Mono(7f, FontStyle.Regular),
-                Palette.MutedBlue, new RectangleF(_preview.X + 195f, infoY, 140f, 14f),
-                StringAlignment.Near, StringAlignment.Center);
-            DrawingHelper.DrawText(g, Settings.ReducedMotion ? "REDUCED" : "FULL",
-                UiFonts.Mono(10f, FontStyle.Bold), Settings.ReducedMotion ? Palette.ToxicGreen : Palette.NeonCyan,
-                new RectangleF(_preview.X + 195f, infoY + 16f, 140f, 18f),
-                StringAlignment.Near, StringAlignment.Center);
-
-            DrawingHelper.DrawText(g, "ACCESSIBILITY", UiFonts.Mono(7f, FontStyle.Bold),
-                Palette.Alpha(Palette.NeonCyan, 170), new RectangleF(_preview.X + 20f, infoY + 50f, 300f, 14f),
-                StringAlignment.Near, StringAlignment.Center);
-            DrawingHelper.DrawText(g,
-                "Correct = check. Wrong = X. High contrast. Shake can be disabled.",
-                _body, Palette.Alpha(Palette.MutedBlue, 205),
-                new RectangleF(_preview.X + 20f, infoY + 68f, _preview.Width - 40f, 44f),
-                StringAlignment.Near, StringAlignment.Near);
-            DrawingHelper.DrawText(g, "SAVED AUTOMATICALLY",
-                UiFonts.Mono(6.8f, FontStyle.Regular), Palette.Alpha(Palette.ToxicGreen, 150),
-                new RectangleF(_preview.X + 20f, _preview.Bottom - 24f, _preview.Width - 40f, 12f),
-                StringAlignment.Near, StringAlignment.Center);
-        }
-
         public bool HandleKey(Keys key)
         {
             if (key == Keys.Escape)
@@ -359,29 +260,11 @@ namespace TypingDead.Forms
                     changed = true;
                     break;
                 case 3:
-                    Settings.ScreenShake = direction < 0 ? false : (direction > 0 ? true : !Settings.ScreenShake);
-                    if (Settings.ReducedMotion && Settings.ScreenShake)
-                    {
-                        Settings.ScreenShake = false;
-                        ShowFeedback("DISABLED BY REDUCED MOTION", Palette.Amber);
-                    }
-                    changed = true;
-                    break;
-                case 4:
-                    Settings.ShowTypingProgress = direction < 0 ? false : (direction > 0 ? true : !Settings.ShowTypingProgress);
-                    changed = true;
-                    break;
-                case 5:
-                    Settings.ReducedMotion = direction < 0 ? false : (direction > 0 ? true : !Settings.ReducedMotion);
-                    if (Settings.ReducedMotion) Settings.ScreenShake = false;
-                    changed = true;
-                    break;
-                case 6:
                     _manager.ResetToDefaults();
                     changed = true;
                     ShowFeedback("DEFAULTS RESTORED", Palette.ToxicGreen);
                     break;
-                case 7:
+                case 4:
                     ClosePanel();
                     break;
             }
@@ -422,8 +305,8 @@ namespace TypingDead.Forms
             {
                 if (_rows[i].Contains(point)) hover = i;
             }
-            if (_reset.HitTest(point)) hover = 6;
-            if (_back.HitTest(point)) hover = 7;
+            if (_reset.HitTest(point)) hover = 3;
+            if (_back.HitTest(point)) hover = 4;
             if (hover != _hoverIndex)
             {
                 _hoverIndex = hover;
@@ -448,7 +331,7 @@ namespace TypingDead.Forms
             PointF point = ToVirtual(e.Location);
             if (_reset.HitTest(point))
             {
-                ActivateItem(6, 1);
+                ActivateItem(3, 1);
                 return;
             }
             if (_back.HitTest(point))

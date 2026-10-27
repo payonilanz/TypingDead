@@ -63,7 +63,7 @@ namespace TypingDead.Forms
             MaximizeBox = true;
             _lastDifficulty = GameDifficulty.Easy;
 
-            _menu = new MainMenuPanel(_audio, _highScores);
+            _menu = new MainMenuPanel(_audio);
             _difficultyPanel = new DifficultyPanel(_audio, _highScores, _progression);
             _game = new GamePanel(_audio);
             _tutorial = new TutorialPanel();
@@ -316,6 +316,17 @@ namespace TypingDead.Forms
             target.Focus();
             _screen = kind;
             Cursor = Cursors.Default;
+
+            // Music plays on menus and every non-gameplay screen. Starting a
+            // mode is the only action that silences it.
+            if (kind == ScreenKind.Game)
+            {
+                _audio.StopMusic();
+            }
+            else
+            {
+                _audio.StartMusic();
+            }
 
             if (kind == ScreenKind.Menu)
             {

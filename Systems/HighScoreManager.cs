@@ -38,7 +38,9 @@ namespace TypingDead.Systems
     }
 
     /// <summary>
-    /// Local best scores per difficulty. Invalid or missing files are ignored.
+    /// Per-session best scores. Every program launch starts from zero, so the
+    /// score display never carries over from a previous run. Best values are
+    /// still tracked and saved while the current session is open.
     /// </summary>
     public sealed class HighScoreManager
     {
@@ -51,38 +53,10 @@ namespace TypingDead.Systems
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "TypingDead");
             _path = Path.Combine(folder, "highscores.json");
+
+            // Deliberately do not load the previous session's file. The score
+            // display must begin at 0 on every program start.
             Data = new HighScoreData();
-            Load();
-        }
-
-        private void Load()
-        {
-            try
-            {
-                if (!File.Exists(_path)) return;
-                string json = File.ReadAllText(_path, Encoding.UTF8);
-                if (String.IsNullOrWhiteSpace(json)) return;
-
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(HighScoreData));
-                using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(json)))
-                {
-                    HighScoreData data = serializer.ReadObject(stream) as HighScoreData;
-                    if (data != null)
-                    {
-                        if (data.Easy < 0) data.Easy = 0;
-                        if (data.Medium < 0) data.Medium = 0;
-                        if (data.Hard < 0) data.Hard = 0;
-                        if (data.Easy > GameConfig.ModeScoreTarget) data.Easy = GameConfig.ModeScoreTarget;
-                        if (data.Medium > GameConfig.ModeScoreTarget) data.Medium = GameConfig.ModeScoreTarget;
-                        if (data.Hard > GameConfig.ModeScoreTarget) data.Hard = GameConfig.ModeScoreTarget;
-                        Data = data;
-                    }
-                }
-            }
-            catch
-            {
-                Data = new HighScoreData();
-            }
         }
 
         public int GetBest(GameDifficulty difficulty)

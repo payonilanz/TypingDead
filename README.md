@@ -14,6 +14,7 @@ All artwork, effects, and audio are generated at runtime. There are no image fil
 
 - Exactly **three lanes** and three lives.
 - **Enter-to-attack** combat with nonlethal typing mistakes.
+- Automatic target lock on the nearest living zombie in the player's lane.
 - IT / Data Structures word pools, including multi-word terms typed with Space.
 - Three complete modes: **Easy**, **Medium**, and **Hard**.
 - One 100-point run per mode. No hidden levels or level transitions.
@@ -21,7 +22,8 @@ All artwork, effects, and audio are generated at runtime. There are no image fil
 - Unlock progression: Easy -> Medium -> Hard -> **Final Victory**.
 - Pixel-art battlefield, HUD, effects, menus, and result screens.
 - Compact, short-phrase interface text.
-- Built-in headless test suite: **159 checks, 0 failures**.
+- Music across menus and non-gameplay screens, silenced only during a run.
+- Built-in headless test suite: **172 checks, 0 failures**.
 
 ---
 
@@ -73,7 +75,7 @@ The test harness runs headlessly, writes `selftest-results.txt` beside the execu
 Current verified result:
 
 ```text
-CHECKS PASSED: 159
+CHECKS PASSED: 172
 CHECKS FAILED: 0
 RESULT: PASS
 ```
@@ -104,7 +106,7 @@ RESULT: PASS
 
 - The battlefield always has exactly three lanes.
 - Up/Down or W/S clamp at lane 1 and lane 3; there is no fourth lane.
-- The nearest **living** zombie in the player's lane becomes the current target.
+- The nearest **living** zombie in the player's lane is targeted automatically. If a closer zombie enters that lane, target lock moves to it.
 - Moving lanes never submits a word, fires a projectile, damages the player, or resets enemy health/word progress.
 
 ### Enter-to-attack
@@ -143,7 +145,9 @@ Submission rules:
 
 - Standard kills award 10 points.
 - Runners are single-hit enemies in every mode, including Hard: one correct word submission defeats them.
+- Hard mode contains **no Tanks and no Specials**. It replaces them with multiple longer-word Runners, so every Hard kill is a single-word, single-hit Runner or Walker.
 - The score is clamped at **100**.
+- Each program launch starts the score display at **0**; personal bests are session-only and reset when the game is restarted.
 - When the player reaches 100 points, the mode completes immediately for scoring purposes. No more rewards or completion events are accepted after success.
 - All three modes are configured for **100 points**, not 500 and not multiple levels.
 
@@ -164,14 +168,14 @@ The Tank is the signature durability enemy:
 |---|---|---|---|
 | **Easy** | Mostly Walkers; a few slow Tanks later | 3-5 characters | Available from a fresh game |
 | **Medium** | Walkers, fast Runners, three-word Tanks | 5-9 characters | Complete Easy |
-| **Hard** | Very fast Runners, fast Tanks, rare Specials | **every word is 10-18 characters** | Complete Medium |
+| **Hard** | Runner-heavy waves with Walkers; no Tanks or Specials | **every word is 10-18 characters** | Complete Medium |
 
 ### Word content
 
 All assigned terms come from Information Technology and Data Structures vocabulary:
 
 - **Easy (3-5):** `ARRAY`, `STACK`, `QUEUE`, `GRAPH`, `TREE`, `NODE`, `DATA`, `LIST`, `HEAP`, `LINK`, `LOOP`.
-- **Medium (5-9):** `ALGORITHM`, `POINTER`, `BINARY`, `SEARCH`, `LINKED`, `SORTING`, `NETWORK`, `CIPHER`.
+- **Medium (5-9):** `ALGORITHM`, `POINTER`, `BINARY`, `SEARCH`, `LINKED`, `SORTING`, `NETWORK`, `CIPHER`, plus spaced terms such as `HASH MAP`, `DATA SET`, `TREE NODE`, `BASE CASE`, `TEST CASE`, `BIG DATA`, and `BUG FIX`.
 - **Hard (10-18):** `LINKED LIST`, `BINARY TREE`, `HASH TABLE`, `SINGLY LINKED LIST`, `DOUBLY LINKED LIST`, `BINARY SEARCH TREE`, `PRIORITY QUEUE`, `DATA STRUCTURE`, `TIME COMPLEXITY`.
 
 Hard terms are measured in characters including spaces, and the longest entries are exactly 18 characters.
@@ -185,23 +189,30 @@ Progression rules:
 - Any failed run resets progression to **Easy only**.
 - Easy always remains available.
 - Completed modes remain replayable.
-- Progression is intentionally **session-only**. Starting the application creates a fresh Easy-only progression, while settings and personal bests are saved on disk.
+- Progression is intentionally **session-only**. Starting the application creates a fresh Easy-only progression and a zero score display. Settings still persist on disk; personal bests reset each launch.
 
 ### Hard mode guarantee
 
-Hard-mode word assignment does not merely offer long words. **Every word assigned to every enemy — including every Tank word — is validated at 10 characters or more.** Multi-word terms are counted with their spaces. The word manager is also checked constantly by the self-test.
+Hard-mode word assignment does not merely offer long words. **Every word assigned to every enemy is validated at 10 characters or more.** Multi-word terms are counted with their spaces. The word manager is also checked constantly by the self-test.
+
+### Music and audio
+
+- The procedural background loop plays on the Main Menu, Difficulty Selection, How to Play, Settings, Pause, and result screens.
+- Music stops only when Easy, Medium, or Hard gameplay starts.
+- Sound effects and music can each be toggled independently in Settings.
+- Graphics quality controls particle density; the former Reduced Motion, Screen Shake, and preview controls are no longer shown.
 
 ---
 
 ## Screens
 
-- **Main Menu** — Play, How to Play, Settings, Exit Game, personal bests, and the exact group footer `J. Francia // K. Galay // L. Garcia // C. Hernandez`.
-- **Difficulty Selection** — three mode cards with lock state, completion state, best score, tuning summary, and working Play/Replay buttons.
+- **Main Menu** — Play, How to Play, Settings, Exit Game, and the exact group footer `J. Francia // K. Galay // L. Garcia // C. Hernandez`.
+- **Difficulty Selection** — three mode cards with lock state, completion state, best score, tuning summary, and working Play/Replay buttons. `BEST` reads `COMPLETED` after a cleared mode.
 - **Gameplay** — pixel HUD, three lanes, targeted word tags, Tank segments, typing console, word-ready state, and status feedback.
 - **Pause** — Resume, Restart, Settings, Main Menu. The run freezes underneath.
-- **Settings** — sound, music, effects quality, screen shake, typing progress, reduced motion, and a live pixel preview. Changes save immediately.
+- **Settings** — sound effects, music, and graphics quality. Changes save immediately.
 - **How to Play** — controls, Enter-to-attack rules, zombie types, Tank mechanics, modes, unlocks, and reset rules.
-- **Mode Completion** — success report, final score, personal best, stats, Continue.
+- **Mode Completion** — success report, `COMPLETED` in place of `100/100`, stats, and a replay option.
 - **Game Over** — failure report and Retry/Main Menu.
 - **Final Victory** — the all-modes-cleared ending and a fresh-start option.
 
@@ -250,7 +261,7 @@ TypingDead/
 
   Systems/
     AudioManager.cs          Procedural sound and music synthesis
-    HighScoreManager.cs      Persistent per-mode personal bests
+    HighScoreManager.cs      Session-only per-mode bests (zero each launch)
     InputHandler.cs          Keyboard-to-command mapping
     ScoreManager.cs          Score, streak, accuracy statistics and 100-point clamp
     SettingsManager.cs       JSON settings persistence
@@ -262,7 +273,7 @@ TypingDead/
     WalkerEnemy.cs           Standard zombie
     RunnerEnemy.cs           Fast zombie
     TankEnemy.cs             Three-word / three-segment Tank
-    SpecialZombie.cs         Two-word Hard-mode mutant
+    SpecialZombie.cs         Two-word mutant retained for tests; not spawned in Hard
     Player.cs                Lane, target, typing, and charge state
     Projectile.cs            Attack that resolves against one target
     EnemyType.cs
@@ -285,7 +296,7 @@ TypingDead/
     PixelBackground.cs       Shared pixel-art background
 
   Tests/
-    SelfTest.cs              159-check headless rules verification
+    SelfTest.cs              172-check headless rules verification
 ```
 
 There are no `.Designer.cs` files and no `TextBox` controls. Every screen is custom-painted on a `VirtualScreenPanel`.

@@ -48,6 +48,7 @@ namespace TypingDead.Tests
                 TestEmptyAndWrongSubmission(audio, settings);
                 TestTankZombie(audio, settings);
                 TestRunnerDurability(audio, settings);
+                TestTargetLock(audio, settings);
                 TestLaneChangesPreserveProgress(audio, settings);
                 TestPauseFreeze(audio, settings);
                 TestScoreCapAndCompletion(audio, settings);
@@ -119,6 +120,28 @@ namespace TypingDead.Tests
             Check("Easy words are 3-5 letters", easyValid);
             Check("Medium words are 5-9 letters", mediumValid);
             Check("Hard words are 10-18 letters", hardValid);
+
+            bool mediumSpaced = false;
+            for (int i = 0; i < 1200; i++)
+            {
+                string candidate = words.GetWord(GameDifficulty.Medium, EnemyType.Walker);
+                if (candidate.IndexOf(' ') >= 0)
+                {
+                    mediumSpaced = true;
+                    break;
+                }
+            }
+            Check("Medium pool includes spaced terms", mediumSpaced);
+            Check("Spaced Medium term is accepted",
+                words.ValidateWord(GameDifficulty.Medium, "HASH MAP"));
+
+            bool hardRunnerLong = true;
+            for (int i = 0; i < 240; i++)
+            {
+                string runnerWord = words.GetWord(GameDifficulty.Hard, EnemyType.Runner);
+                if (runnerWord.Length < 13) hardRunnerLong = false;
+            }
+            Check("Hard Runner words are longer terms", hardRunnerLong);
 
             string[] tankWords = words.GetWords(GameDifficulty.Medium, EnemyType.Tank, 3);
             Check("Tank receives exactly three words", tankWords.Length == 3);
@@ -388,6 +411,32 @@ namespace TypingDead.Tests
             Log.AppendLine();
         }
 
+        private static void TestTargetLock(AudioManager audio, GameSettings settings)
+        {
+            Log.AppendLine("[TARGET LOCK]");
+            EffectManager effects = new EffectManager();
+            GameManager game = new GameManager(GameDifficulty.Easy, settings, audio, effects, 110);
+            game.DisableSpawningForTest();
+            WalkerEnemy farther = new WalkerEnemy(1, "ARRAY");
+            game.AddEnemyForTest(farther);
+            Advance(game, 0.55f);
+            Check("Nearest lane enemy becomes the target", game.Player.Target == farther);
+
+            WalkerEnemy nearer = new WalkerEnemy(1, "STACK");
+            game.AddEnemyForTest(nearer);
+            nearer.Update(0.5f, 0f);
+            nearer.SetXForTest(500f);
+            farther.SetXForTest(900f);
+            Advance(game, 0.02f);
+            Check("Target lock switches to a closer enemy", game.Player.Target == nearer);
+            Check("Target lock keeps the player's lane",
+                game.Player.Target != null && game.Player.Target.Lane == game.Player.Lane);
+
+            game.MoveLane(-1);
+            Check("Changing lanes releases a target from the old lane", game.Player.Target == null);
+            Log.AppendLine();
+        }
+
         private static void TestLaneChangesPreserveProgress(AudioManager audio, GameSettings settings)
         {
             Log.AppendLine("[LANE SAFETY]");
@@ -448,6 +497,11 @@ namespace TypingDead.Tests
         private static void TestScoreCapAndCompletion(AudioManager audio, GameSettings settings)
         {
             Log.AppendLine("[100-POINT COMPLETION]");
+            EffectManager freshEffects = new EffectManager();
+            GameManager fresh = new GameManager(GameDifficulty.Hard, settings, audio, freshEffects, 111);
+            Check("A fresh run starts at zero score", fresh.Score == 0);
+            Check("A fresh run starts with three lives", fresh.Lives == 3);
+
             EffectManager easyEffects = new EffectManager();
             GameManager easy = new GameManager(GameDifficulty.Easy, settings, audio, easyEffects, 105);
             easy.DisableSpawningForTest();
@@ -531,6 +585,9 @@ namespace TypingDead.Tests
             bool lanesValid = true;
             bool wordsValid = true;
             bool hardLengths = true;
+            bool hardNoTanksOrSpecials = true;
+            bool hardRunnerLong = true;
+            int hardRunners = 0;
             List<Enemy> active = new List<Enemy>();
             GameDifficulty[] modes = new GameDifficulty[]
             {
@@ -550,6 +607,18 @@ namespace TypingDead.Tests
                     if (enemy.Type == EnemyType.Special && (enemy.WordCount != 2 || enemy.Health != 2))
                         wordsValid = false;
                     if (modes[m] == GameDifficulty.Hard && enemy.Word.Length < 10) hardLengths = false;
+                    if (modes[m] == GameDifficulty.Hard)
+                    {
+                        if (enemy.Type == EnemyType.Tank || enemy.Type == EnemyType.Special)
+                        {
+                            hardNoTanksOrSpecials = false;
+                        }
+                        if (enemy.Type == EnemyType.Runner)
+                        {
+                            hardRunners++;
+                            if (enemy.Word.Length < 13) hardRunnerLong = false;
+                        }
+                    }
                     enemy.Update(0.5f, 0f);
                     active.Clear();
                 }
@@ -558,6 +627,9 @@ namespace TypingDead.Tests
             Check("Spawner only uses the three valid lanes", lanesValid);
             Check("Tank and Special spawn with correct word/health counts", wordsValid);
             Check("Hard spawns never assign a word below ten letters", hardLengths);
+            Check("Hard spawns exclude Tanks and Specials", hardNoTanksOrSpecials);
+            Check("Hard sends a Runner-heavy mix", hardRunners >= 20);
+            Check("Hard Runner spawns use longer terms", hardRunnerLong);
 
             List<Enemy> crowded = new List<Enemy>();
             crowded.Add(new WalkerEnemy(0, "STACK"));
@@ -587,6 +659,10 @@ namespace TypingDead.Tests
                 Math.Abs(score.Accuracy - 50f) < 0.01f);
 
             HighScoreData best = new HighScoreData();
+            Check("A new score table starts at zero",
+                best.Get(GameDifficulty.Easy) == 0 &&
+                best.Get(GameDifficulty.Medium) == 0 &&
+                best.Get(GameDifficulty.Hard) == 0);
             best.Set(GameDifficulty.Easy, 230);
             Check("Personal best is capped at 100", best.Get(GameDifficulty.Easy) == 100);
             best.Set(GameDifficulty.Easy, -5);

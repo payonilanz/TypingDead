@@ -31,14 +31,20 @@ namespace TypingDead.Systems
                 "RAM", "CPU", "API", "BUS", "KEY", "MAP", "SET"
             };
 
-            // Medium terms: 5-9 letters. Single-word concepts and short terms.
+            // Medium terms: 5-9 characters. Includes spaced two-word terms,
+            // which are typed with a real Space key.
             _words[GameDifficulty.Medium] = new string[]
             {
                 "ALGORITHM", "POINTER", "BINARY", "SEARCH", "LINKED", "INSERT",
                 "DELETE", "MEMORY", "LINEAR", "SORTING", "INDEX", "MERGE",
                 "ARRAYS", "QUEUES", "STACKS", "TABLES", "RECURSE", "HASHING",
                 "ENCRYPT", "NETWORK", "SERVER", "CLIENT", "ROUTER", "CIPHER",
-                "QUEUED", "STACKED", "LINKING", "SORTED"
+                "QUEUED", "STACKED", "LINKING", "SORTED",
+                "HASH MAP", "HASH SET", "BIT MASK", "DATA SET", "KEY PAIR",
+                "TREE NODE", "LINK NODE", "BASE CASE", "STACK TOP", "TREE ROOT",
+                "LEAF NODE", "MAIN LOOP", "SORT KEY", "HARD DISK", "CODE BASE",
+                "TEST CASE", "USE CASE", "BIG DATA", "OPEN API", "BUG FIX",
+                "LOW BIT"
             };
 
             // Hard terms: every entry is 10-18 characters. Spaces are typed
@@ -78,13 +84,32 @@ namespace TypingDead.Systems
             Queue<string> recent = _recent[difficulty];
             string chosen = null;
 
-            for (int attempt = 0; attempt < 120; attempt++)
+            // Hard-mode Runners are the replacement threat for Tanks and
+            // Specials, so they draw from the longer end of the Hard pool.
+            int minimumLength = difficulty == GameDifficulty.Hard && type == EnemyType.Runner
+                ? 13 : 0;
+
+            for (int attempt = 0; attempt < 160; attempt++)
             {
                 string candidate = pool[_random.Next(pool.Length)];
                 if (!ValidateWord(difficulty, candidate)) continue;
+                if (candidate.Length < minimumLength) continue;
                 if (recent.Contains(candidate) && recent.Count < pool.Length - 1) continue;
                 chosen = candidate;
                 break;
+            }
+
+            if (chosen == null)
+            {
+                // Deterministic fallback that still respects the length rule.
+                for (int i = 0; i < pool.Length; i++)
+                {
+                    if (ValidateWord(difficulty, pool[i]) && pool[i].Length >= minimumLength)
+                    {
+                        chosen = pool[i];
+                        break;
+                    }
+                }
             }
 
             if (chosen == null)
