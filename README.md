@@ -198,6 +198,7 @@ Hard-mode word assignment does not merely offer long words. **Every word assigne
 ### Music and audio
 
 - The procedural background loop plays on the Main Menu, Difficulty Selection, How to Play, Settings, Pause, and result screens.
+- Music runs on its own audio channel, so menu and UI sound effects do not interrupt or restart it.
 - Music stops only when Easy, Medium, or Hard gameplay starts.
 - Sound effects and music can each be toggled independently in Settings.
 - Graphics quality controls particle density; the former Reduced Motion, Screen Shake, and preview controls are no longer shown.

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Media;
+using System.Runtime.InteropServices;
+using System.Text;
 using TypingDead.Game;
 
 namespace TypingDead.Systems
@@ -27,10 +29,12 @@ namespace TypingDead.Systems
     }
 
     /// <summary>
-    /// Centralised audio. All WAV assets are synthesised in memory at startup,
-    /// so the project has no missing-file dependencies. SoundPlayer cannot mix
-    /// arbitrary volume levels, so sounds are generated at restrained levels
-    /// and fast repeats are throttled to avoid overwhelming the mix.
+    /// Centralised audio. All WAV assets are synthesised at startup, so the
+    /// project has no missing-file dependencies. Sound effects use SoundPlayer,
+    /// which only supports one waveform at a time, so the looping menu music is
+    /// played through a separate MCI channel. That lets music and menu sound
+    /// effects mix instead of cutting each other off. Music is stopped only
+    /// when gameplay begins.
     /// </summary>
     public sealed class AudioManager : IDisposable
     {
@@ -85,6 +89,18 @@ namespace TypingDead.Systems
         private SoundPlayer _musicPlayer;
         private MemoryStream _musicStream;
         private readonly object _sync = new object();
+
+        // Music runs on its own MCI channel so SoundPlayer effects cannot stop
+        // it. MCI waveaudio has no reliable "repeat" flag, so a lightweight
+        // timer restarts the track when it reaches the end.
+        private readonly string _musicAlias = "tdmusic" + Guid.NewGuid().ToString("N").Substring(0, 8);
+        private string _musicPath;
+        private bool _musicOpen;
+        private System.Windows.Forms.Timer _musicLoopTimer;
+
+        [DllImport("winmm.dll", CharSet = CharSet.Unicode)]
+        private static extern int mciSendString(string command, StringBuilder returnValue,
+            int returnLength, IntPtr hwndCallback);
 
         public bool SoundEnabled { get; private set; }
         public bool MusicEnabled { get; private set; }
@@ -226,6 +242,19 @@ namespace TypingDead.Systems
             _musicStream = new MemoryStream(data);
             _musicPlayer = new SoundPlayer(_musicStream);
             _musicPlayer.Load();
+
+            // MCI needs a file path. The temporary WAV is removed on dispose.
+            try
+            {
+                string folder = Path.Combine(Path.GetTempPath(), "TypingDead");
+                Directory.CreateDirectory(folder);
+                _musicPath = Path.Combine(folder, "menu-music-" + _musicAlias + ".wav");
+                File.WriteAllBytes(_musicPath, data);
+            }
+            catch
+            {
+                _musicPath = null;
+            }
         }
 
         public void ApplySettings(GameSettings settings)
@@ -266,30 +295,106 @@ namespace TypingDead.Systems
 
         public void StartMusic()
         {
-            if (!Available || !MusicEnabled || _musicPlayer == null) return;
-            if (MusicPlaying) return;
-            try
+            if (!Available || !MusicEnabled) return;
+
+            lock (_sync)
             {
-                _musicPlayer.PlayLooping();
-                MusicPlaying = true;
-            }
-            catch
-            {
-                MusicPlaying = false;
+                if (MusicPlaying) return;
+
+                if (TryStartMciMusic())
+                {
+                    MusicPlaying = true;
+                    EnsureMusicLoop();
+                    return;
+                }
+
+                // Fallback for systems where MCI is unavailable. SoundPlayer
+                // music can be interrupted by effects, but it is better than
+                // silence.
+                if (_musicPlayer != null)
+                {
+                    try
+                    {
+                        _musicPlayer.PlayLooping();
+                        MusicPlaying = true;
+                    }
+                    catch
+                    {
+                        MusicPlaying = false;
+                    }
+                }
             }
         }
 
         public void StopMusic()
         {
-            if (_musicPlayer == null) return;
-            try
+            lock (_sync)
             {
-                _musicPlayer.Stop();
+                MusicPlaying = false;
+
+                if (_musicOpen)
+                {
+                    MciSend("stop " + _musicAlias);
+                    MciSend("seek " + _musicAlias + " to start");
+                }
+
+                if (_musicPlayer != null)
+                {
+                    try { _musicPlayer.Stop(); } catch { }
+                }
             }
-            catch
+        }
+
+        private bool TryStartMciMusic()
+        {
+            if (String.IsNullOrEmpty(_musicPath) || !File.Exists(_musicPath)) return false;
+
+            if (!_musicOpen)
             {
+                int open = MciSend("open \"" + _musicPath + "\" type waveaudio alias " + _musicAlias);
+                if (open != 0) return false;
+                _musicOpen = true;
             }
-            MusicPlaying = false;
+
+            MciSend("seek " + _musicAlias + " to start");
+            return MciSend("play " + _musicAlias) == 0;
+        }
+
+        private void EnsureMusicLoop()
+        {
+            if (_musicLoopTimer == null)
+            {
+                // MCI device aliases are thread-affine, so the loop check must
+                // run on the UI thread that opened the device.
+                _musicLoopTimer = new System.Windows.Forms.Timer();
+                _musicLoopTimer.Interval = 200;
+                _musicLoopTimer.Tick += MusicLoopTick;
+                _musicLoopTimer.Start();
+            }
+        }
+
+        private void MusicLoopTick(object sender, EventArgs e)
+        {
+            lock (_sync)
+            {
+                if (!MusicPlaying || !_musicOpen) return;
+
+                StringBuilder mode = new StringBuilder(32);
+                int result = mciSendString("status " + _musicAlias + " mode", mode,
+                    mode.Capacity, IntPtr.Zero);
+                if (result != 0) return;
+
+                if (String.Equals(mode.ToString().Trim(), "stopped", StringComparison.OrdinalIgnoreCase))
+                {
+                    MciSend("seek " + _musicAlias + " to start");
+                    MciSend("play " + _musicAlias);
+                }
+            }
+        }
+
+        private static int MciSend(string command)
+        {
+            return mciSendString(command, null, 0, IntPtr.Zero);
         }
 
         public void RefreshMusic(GameSettings settings)
@@ -312,6 +417,24 @@ namespace TypingDead.Systems
             }
             _sounds.Clear();
 
+            if (_musicLoopTimer != null)
+            {
+                try { _musicLoopTimer.Stop(); } catch { }
+                try { _musicLoopTimer.Dispose(); } catch { }
+                _musicLoopTimer = null;
+            }
+
+            lock (_sync)
+            {
+                MusicPlaying = false;
+                if (_musicOpen)
+                {
+                    MciSend("stop " + _musicAlias);
+                    MciSend("close " + _musicAlias);
+                    _musicOpen = false;
+                }
+            }
+
             if (_musicPlayer != null)
             {
                 try { _musicPlayer.Stop(); } catch { }
@@ -322,6 +445,11 @@ namespace TypingDead.Systems
             {
                 try { _musicStream.Dispose(); } catch { }
                 _musicStream = null;
+            }
+            if (!String.IsNullOrEmpty(_musicPath))
+            {
+                try { File.Delete(_musicPath); } catch { }
+                _musicPath = null;
             }
         }
 
