@@ -4,7 +4,7 @@
 
 TYPING DEAD is a single-player pixel-art typing survival game for Windows, written in C# with WinForms and GDI+. You defend **three lanes** against a zombie horde by typing the word attached to the nearest zombie in your lane. Correct words do **not** fire automatically: after the word matches, you press **Enter** to attack.
 
-The word pools are made of **Information Technology and Data Structures terms**, from short basics such as `ARRAY`, `STACK`, and `QUEUE` up to multi-word names such as `LINKED LIST`, `BINARY SEARCH TREE`, and `DOUBLY LINKED LIST`. Multi-word terms are typed with a real **Space** between words.
+The word pools are made of **IT and Data Structures terms**, from short basics such as `ARRAY`, `STACK`, and `QUEUE` up to multi-word names such as `LINKED LIST`, `BINARY SEARCH TREE`, and `DOUBLY LINKED LIST`. Multi-word terms are typed with a real **Space** between words.
 
 All artwork, effects, and audio are generated at runtime. There are no image files, font files, or WAV files to load, and the game never uses the network.
 
