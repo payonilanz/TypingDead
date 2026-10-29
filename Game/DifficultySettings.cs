@@ -41,7 +41,7 @@ namespace TypingDead.Game
                 case GameDifficulty.Easy:
                     settings.Name = "EASY";
                     settings.ShortImpact = "START HERE";
-                    settings.Description = "Short terms and slow walkers.";
+                    settings.Description = "Short terms and a gentle pace.";
                     settings.ZombieSummary = "WALKERS";
                     settings.WalkerSpeed = 45f;
                     settings.RunnerSpeed = 64f;
@@ -56,8 +56,8 @@ namespace TypingDead.Game
                 case GameDifficulty.Medium:
                     settings.Name = "MEDIUM";
                     settings.ShortImpact = "FAST RUSH";
-                    settings.Description = "More words, runners and Tanks.";
-                    settings.ZombieSummary = "RUNNERS + TANKS";
+                    settings.Description = "Faster pace and tighter timing.";
+                    settings.ZombieSummary = "WALKERS + RUNNERS";
                     settings.WalkerSpeed = 58f;
                     settings.RunnerSpeed = 88f;
                     settings.TankSpeed = 34f;
@@ -65,13 +65,13 @@ namespace TypingDead.Game
                     settings.SpawnInterval = 1.72f;
                     settings.MaxEnemies = 5;
                     settings.MinimumWordLength = 5;
-                    settings.MaximumWordLength = 9;
+                    settings.MaximumWordLength = 6;
                     break;
 
                 default:
                     settings.Name = "HARD";
                     settings.ShortImpact = "FINAL MODE";
-                    settings.Description = "Long terms and relentless Runners.";
+                    settings.Description = "Long terms and relentless pressure.";
                     settings.ZombieSummary = "RUNNERS + WALKERS";
                     settings.WalkerSpeed = 70f;
                     settings.RunnerSpeed = 122f;
@@ -79,8 +79,8 @@ namespace TypingDead.Game
                     settings.SpecialSpeed = 108f;
                     settings.SpawnInterval = 1.35f;
                     settings.MaxEnemies = 6;
-                    settings.MinimumWordLength = 10;
-                    settings.MaximumWordLength = 18;
+                    settings.MinimumWordLength = 7;
+                    settings.MaximumWordLength = 9;
                     break;
             }
             return settings;

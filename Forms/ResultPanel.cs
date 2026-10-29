@@ -270,7 +270,7 @@ namespace TypingDead.Forms
             if (_kind == ResultKind.GameOver)
             {
                 return DifficultySettings.GetDisplayName(_result.Difficulty) +
-                    " FAILED // PROGRESS RESET";
+                    " FAILED // UNLOCKS KEPT";
             }
             if (_kind == ResultKind.FinalVictory)
             {
@@ -287,7 +287,7 @@ namespace TypingDead.Forms
             }
             if (_kind == ResultKind.FinalVictory)
             {
-                return "PLAY AGAIN STARTS A FRESH RUN.";
+                return "PLAY AGAIN RETURNS TO MODE SELECT.";
             }
             return "CONTINUE OPENS THE NEXT MODE.";
         }

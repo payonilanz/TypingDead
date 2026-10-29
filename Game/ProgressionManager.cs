@@ -3,24 +3,50 @@ using System;
 namespace TypingDead.Game
 {
     /// <summary>
-    /// Owns the Easy -> Medium -> Hard unlock sequence. UI screens ask this
-    /// class for state and never calculate unlock rules themselves.
+    /// Storage contract for permanent mode unlocks. The game uses a JSON store;
+    /// tests can use an in-memory manager with no store.
+    /// </summary>
+    public interface IProgressionStore
+    {
+        void Load(bool[] unlocked, bool[] completed);
+        void Save(bool[] unlocked, bool[] completed);
+    }
+
+    /// <summary>
+    /// Owns the Easy -> Medium -> Hard unlock sequence. Unlocks are permanent:
+    /// losing never removes them, and every change is written through the
+    /// optional store so progress survives an application restart.
     /// </summary>
     public sealed class ProgressionManager
     {
         private readonly bool[] _completed;
         private readonly bool[] _unlocked;
+        private readonly IProgressionStore _store;
 
         public event EventHandler Changed;
 
-        public ProgressionManager()
+        public ProgressionManager() : this(null)
+        {
+        }
+
+        public ProgressionManager(IProgressionStore store)
         {
             _completed = new bool[3];
             _unlocked = new bool[3];
-            Reset();
+            _store = store;
+            ResetState();
+            Load();
         }
 
+        /// <summary>Explicitly returns to a fresh Easy-only progression.</summary>
         public void Reset()
+        {
+            ResetState();
+            Save();
+            RaiseChanged();
+        }
+
+        private void ResetState()
         {
             for (int i = 0; i < _completed.Length; i++)
             {
@@ -28,7 +54,6 @@ namespace TypingDead.Game
                 _unlocked[i] = false;
             }
             _unlocked[(int)GameDifficulty.Easy] = true;
-            RaiseChanged();
         }
 
         public bool IsUnlocked(GameDifficulty difficulty)
@@ -68,22 +93,19 @@ namespace TypingDead.Game
                 _unlocked[(int)GameDifficulty.Hard] = true;
                 next = GameDifficulty.Hard;
             }
+
+            Normalize();
+            Save();
             RaiseChanged();
             return next;
         }
 
         /// <summary>
-        /// Any failed run resets later modes. Easy always remains available, so
-        /// Medium and Hard must be earned again in order.
+        /// A failed run never removes unlocks or completion records. The
+        /// parameter identifies the mode that ended so callers can report it.
         /// </summary>
         public void Fail(GameDifficulty difficulty)
         {
-            _completed[(int)GameDifficulty.Easy] = false;
-            _completed[(int)GameDifficulty.Medium] = false;
-            _completed[(int)GameDifficulty.Hard] = false;
-            _unlocked[(int)GameDifficulty.Easy] = true;
-            _unlocked[(int)GameDifficulty.Medium] = false;
-            _unlocked[(int)GameDifficulty.Hard] = false;
             RaiseChanged();
         }
 
@@ -91,6 +113,46 @@ namespace TypingDead.Game
         {
             if (!unlocked.HasValue) return String.Empty;
             return DifficultySettings.GetDisplayName(unlocked.Value) + " MODE UNLOCKED";
+        }
+
+        private void Load()
+        {
+            if (_store == null) return;
+            try
+            {
+                _store.Load(_unlocked, _completed);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
+            Normalize();
+        }
+
+        private void Save()
+        {
+            if (_store == null) return;
+            try
+            {
+                _store.Save(_unlocked, _completed);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Keeps saved data consistent: Easy is always open, and a completed
+        /// mode always leaves its successor unlocked.
+        /// </summary>
+        private void Normalize()
+        {
+            _unlocked[(int)GameDifficulty.Easy] = true;
+            if (_completed[(int)GameDifficulty.Easy]) _unlocked[(int)GameDifficulty.Medium] = true;
+            if (_completed[(int)GameDifficulty.Medium]) _unlocked[(int)GameDifficulty.Hard] = true;
+            if (_unlocked[(int)GameDifficulty.Hard]) _unlocked[(int)GameDifficulty.Medium] = true;
+            if (_unlocked[(int)GameDifficulty.Medium]) _unlocked[(int)GameDifficulty.Easy] = true;
         }
 
         private void RaiseChanged()

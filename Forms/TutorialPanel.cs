@@ -9,7 +9,7 @@ namespace TypingDead.Forms
 {
     /// <summary>
     /// Illustrated rules screen. It explains the Enter-to-attack model, the
-    /// three modes, the three-word Tank Zombie and the progression reset rule.
+    /// three modes, the three-word Tank Zombie and the permanent unlock rule.
     /// </summary>
     public sealed class TutorialPanel : VirtualScreenPanel
     {
@@ -56,7 +56,7 @@ namespace TypingDead.Forms
             DrawSection(g, new RectangleF(668f, 112f, 568f, 250f),
                 "TYPE. PRESS ENTER.", Palette.Warning, new string[]
                 {
-                    "Type with A-Z. Use SPACE between words.",
+                    "Type with A-Z. Every word is one IT term.",
                     "Wrong keys flash red but cost no life.",
                     "",
                     "Complete word: WORD READY: PRESS ENTER.",
@@ -76,8 +76,8 @@ namespace TypingDead.Forms
                     "TANK    -  3 words, 3 health segments.",
                     "           Points only after hit 3.",
                     "",
-                    "HARD    -  Runner waves with long terms.",
-                    "No Tanks or Specials in Hard mode.",
+                    "MEDIUM  -  Walkers and Runners only.",
+                    "HARD    -  Runner waves with Walkers.",
                     "",
                     "Lane changes keep word and health progress."
                 });
@@ -86,11 +86,13 @@ namespace TypingDead.Forms
                 "MODES", Palette.ZombieSkin, new string[]
                 {
                     "EASY    -  3-5 characters.",
-                    "MEDIUM  -  5-9 characters.",
-                    "HARD    -  10-18 characters.",
+                    "MEDIUM  -  5-6 characters.",
+                    "HARD    -  7-9 characters.",
                     "",
-                    "Start with Easy only. Clear a mode to unlock",
-                    "the next. Failure resets unlocks to Easy.",
+                    "All words are single IT / data terms.",
+                    "",
+                    "Clear a mode to unlock the next one.",
+                    "Unlocks stay saved after a loss.",
                     "Completed modes can be replayed.",
                     "",
                     "Best time is tracked for each mode."
@@ -142,7 +144,7 @@ namespace TypingDead.Forms
                 Palette.Success, new RectangleF(x + 14f, y + 4f, 100f, 13f),
                 StringAlignment.Near, StringAlignment.Center);
             DrawingHelper.DrawText(g,
-                "UP/DOWN  MOVE     A-Z + SPACE  TYPE     ENTER  ATTACK     BACKSPACE  EDIT     ESC  PAUSE     F1  HELP",
+                "UP/DOWN  MOVE     A-Z  TYPE     ENTER  ATTACK     BACKSPACE  EDIT     ESC  PAUSE     F1  HELP",
                 UiFonts.Mono(7f, FontStyle.Bold), Palette.PrimaryText,
                 new RectangleF(x + 112f, y + 4f, width - 126f, 18f),
                 StringAlignment.Near, StringAlignment.Center);

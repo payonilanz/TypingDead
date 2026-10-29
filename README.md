@@ -4,7 +4,7 @@
 
 TYPING DEAD is a single-player pixel-art typing survival game for Windows, written in C# with WinForms and GDI+. You defend **three lanes** against a zombie horde by typing the word attached to the nearest zombie in your lane. Correct words do **not** fire automatically: after the word matches, you press **Enter** to attack.
 
-The word pools are made of **IT and Data Structures terms**, from short basics such as `ARRAY`, `STACK`, and `QUEUE` up to multi-word names such as `LINKED LIST`, `BINARY SEARCH TREE`, and `DOUBLY LINKED LIST`. Multi-word terms are typed with a real **Space** between words.
+The word pools are made of **IT and Data Structures terms**. Every target is a complete, single-word term such as `ARRAY`, `STACK`, `QUEUE`, `BINARY`, `NETWORK`, `POINTER`, `ALGORITHM`, and `DATABASE`. No mode uses spaced terms, so the Space key is never required.
 
 All artwork, effects, and audio are generated at runtime. There are no image files, font files, or WAV files to load, and the game never uses the network.
 
@@ -15,15 +15,15 @@ All artwork, effects, and audio are generated at runtime. There are no image fil
 - Exactly **three lanes** and three lives.
 - **Enter-to-attack** combat with nonlethal typing mistakes.
 - Automatic target lock on the nearest living zombie in the player's lane.
-- IT / Data Structures word pools, including multi-word terms typed with Space.
+- IT / Data Structures word pools with single-token terms only.
 - Three complete modes: **Easy**, **Medium**, and **Hard**.
 - One 100-point run per mode. No hidden levels or level transitions.
 - Three-word / three-segment **Tank Zombies**.
-- Unlock progression: Easy -> Medium -> Hard -> **Final Victory**.
+- Permanent unlock progression: Easy -> Medium -> Hard -> **Final Victory**.
 - Pixel-art battlefield, HUD, effects, menus, and result screens.
 - Compact, short-phrase interface text.
 - Music across menus and non-gameplay screens, silenced only during a run.
-- Built-in headless test suite: **177 checks, 0 failures**.
+- Built-in headless test suite: **183 checks, 0 failures**.
 
 ---
 
@@ -75,7 +75,7 @@ The test harness runs headlessly, writes `selftest-results.txt` beside the execu
 Current verified result:
 
 ```text
-CHECKS PASSED: 177
+CHECKS PASSED: 183
 CHECKS FAILED: 0
 RESULT: PASS
 ```
@@ -88,7 +88,6 @@ RESULT: PASS
 |---|---|
 | **Up / Down** or **W / S** | Move the survivor between the three lanes. |
 | **A-Z** | Type the current target word. Wrong characters are highlighted but do not cost a life. |
-| **Space** | Type a single space between words in terms such as `LINKED LIST`. Leading, trailing, and doubled spaces are rejected by validation. |
 | **Enter** | Submit the typed word. A matching word launches the attack. An empty Enter is safe. |
 | **Backspace** | Delete the last typed character. |
 | **Esc** | Pause during gameplay; back out of menus, Settings, or How to Play. |
@@ -96,7 +95,7 @@ RESULT: PASS
 | **F11** | Toggle fullscreen. |
 | Mouse | Every menu button and mode card can be clicked. |
 
-`P` is a normal letter while a target is selected. Pause is always `Esc`.
+`P` is a normal letter while a target is selected. Pause is always `Esc`. No mode assigns a spaced term; every target is a single A-Z token.
 
 ---
 
@@ -111,7 +110,7 @@ RESULT: PASS
 
 ### Enter-to-attack
 
-1. Type the displayed word with A-Z. Use **Space** between words for multi-word terms.
+1. Type the displayed word with A-Z. Every target is a single IT term.
 2. Wrong characters are appended and shown in red, but typing them costs **no life**.
 3. When the full word matches, the console changes to **WORD READY: PRESS ENTER**.
 4. No attack happens automatically.
@@ -141,11 +140,12 @@ Submission rules:
 | **Walker** | 1 segment | 1 word | **10** |
 | **Runner** | 1 segment | 1 word | **10** |
 | **Tank** | 3 segments | **3 distinct words** | **20**, only on the third hit |
-| **Special** | 2 segments | 2 long words | **25** |
+| **Special** | 2 segments | 2 distinct terms | **25** |
 
 - Standard kills award 10 points.
 - Runners are single-hit enemies in every mode, including Hard: one correct word submission defeats them.
-- Hard mode contains **no Tanks and no Specials**. It replaces them with multiple longer-word Runners, so every Hard kill is a single-word, single-hit Runner or Walker.
+- Medium mode contains **no Tanks and no Specials**. It mixes fast Runners with steady Walkers.
+- Hard mode contains **no Tanks and no Specials**. It replaces them with multiple Runners, so every Hard kill is a single-word, single-hit Runner or Walker.
 - The score is clamped at **100**.
 - Each program launch starts the score display at **0**; personal bests and best times are session-only and reset when the game is restarted.
 - When the player reaches 100 points, the mode completes immediately for scoring purposes. No more rewards or completion events are accepted after success.
@@ -167,18 +167,18 @@ The Tank is the signature durability enemy:
 | Mode | Zombie mix | Word length | Unlock rule |
 |---|---|---|---|
 | **Easy** | Mostly Walkers; a few slow Tanks later | 3-5 characters | Available from a fresh game |
-| **Medium** | Walkers, fast Runners, three-word Tanks | 5-9 characters | Complete Easy |
-| **Hard** | Runner-heavy waves with Walkers; no Tanks or Specials | **every word is 10-18 characters** | Complete Medium |
+| **Medium** | Fast Runners and steady Walkers; no Tanks or Specials | 5-6 characters | Complete Easy |
+| **Hard** | Runner-heavy waves with Walkers; no Tanks or Specials | **every word is 7-9 characters** | Complete Medium |
 
 ### Word content
 
-All assigned terms come from Information Technology and Data Structures vocabulary:
+All assigned terms come from Information Technology and Data Structures vocabulary. Every entry is a complete, single-word term; no pool contains a space.
 
-- **Easy (3-5):** `ARRAY`, `STACK`, `QUEUE`, `GRAPH`, `TREE`, `NODE`, `DATA`, `LIST`, `HEAP`, `LINK`, `LOOP`.
-- **Medium (5-9):** `ALGORITHM`, `POINTER`, `BINARY`, `SEARCH`, `LINKED`, `SORTING`, `NETWORK`, `CIPHER`, plus spaced terms such as `HASH MAP`, `DATA SET`, `TREE NODE`, `BASE CASE`, `TEST CASE`, `BIG DATA`, and `BUG FIX`.
-- **Hard (10-18):** `LINKED LIST`, `BINARY TREE`, `HASH TABLE`, `SINGLY LINKED LIST`, `DOUBLY LINKED LIST`, `BINARY SEARCH TREE`, `PRIORITY QUEUE`, `DATA STRUCTURE`, `TIME COMPLEXITY`.
+- **Easy (3-5):** `ARRAY`, `STACK`, `QUEUE`, `GRAPH`, `TREE`, `NODE`, `DATA`, `LIST`, `HEAP`, `CACHE`, `QUERY`, `PIXEL`.
+- **Medium (5-6):** `BINARY`, `SEARCH`, `INSERT`, `DELETE`, `MEMORY`, `SERVER`, `ROUTER`, `PACKET`, `SOCKET`, `MATRIX`, `SCHEMA`, `STREAM`.
+- **Hard (7-9):** `POINTER`, `NETWORK`, `STORAGE`, `PROGRAM`, `DATABASE`, `SECURITY`, `PROTOCOL`, `FUNCTION`, `VARIABLE`, `ALGORITHM`, `RECURSION`, `TRAVERSAL`.
 
-Hard terms are measured in characters including spaces, and the longest entries are exactly 18 characters.
+Hard terms are measured in characters with no spaces, and every entry is between 7 and 9 characters.
 
 Progression rules:
 
@@ -186,15 +186,16 @@ Progression rules:
 - Complete Easy -> Medium unlocks.
 - Complete Medium -> Hard unlocks.
 - Complete Hard -> **Final Victory** screen.
-- Any failed run resets progression to **Easy only**.
+- **Unlocks are permanent.** A failed run, a replay, or restarting the application never relocks a mode or clears a completion badge.
+- Unlock and completion state is saved to `progress.json` and loaded on the next launch.
 - Easy always remains available.
 - Completed modes remain replayable.
 - Each completed run records its duration. The fastest completion per mode appears as `BEST TIME` on the mode card, formatted as `MM:SS`; unset times show `--:--`.
-- Progression is intentionally **session-only**. Starting the application creates a fresh Easy-only progression, a zero score display, and no best times. Settings still persist on disk; personal bests and best times reset each launch.
+- Personal bests and best times remain **session-only**. Settings and unlock progress persist on disk; scores and times begin at zero on each launch.
 
 ### Hard mode guarantee
 
-Hard-mode word assignment does not merely offer long words. **Every word assigned to every enemy is validated at 10 characters or more.** Multi-word terms are counted with their spaces. The word manager is also checked constantly by the self-test.
+Hard-mode word assignment does not merely offer long words. **Every word assigned to every enemy is validated at 7-9 characters and must be a single A-Z token.** The word manager is also checked constantly by the self-test.
 
 ### Music and audio
 
@@ -213,10 +214,10 @@ Hard-mode word assignment does not merely offer long words. **Every word assigne
 - **Gameplay** — pixel HUD, three lanes, targeted word tags, Tank segments, typing console, word-ready state, and status feedback.
 - **Pause** — Resume, Restart, Settings, Main Menu. The run freezes underneath.
 - **Settings** — large full-width rows for sound effects, music, and graphics quality. Changes save immediately.
-- **How to Play** — a full-screen reference for controls, Enter-to-attack rules, zombie types, Tank mechanics, modes, unlocks, and reset rules.
+- **How to Play** — a full-screen reference for controls, Enter-to-attack rules, zombie types, Tank mechanics, modes, permanent unlocks, and word lengths.
 - **Mode Completion** — success report, `COMPLETED` in place of `100/100`, stats, and a replay option.
-- **Game Over** — failure report and Retry/Main Menu.
-- **Final Victory** — the all-modes-cleared ending and a fresh-start option.
+- **Game Over** — failure report and Retry/Main Menu. Unlocks and completion badges are kept.
+- **Final Victory** — the all-modes-cleared ending; Play Again returns to mode selection without clearing progress.
 
 The game also auto-pauses when the window loses focus.
 
@@ -259,16 +260,17 @@ TypingDead/
     GameResult.cs            End-of-run result data
     GameSettings.cs          User preference model
     DifficultySettings.cs    Mode tuning and word-length rules
-    ProgressionManager.cs    Unlock/reset authority
+    ProgressionManager.cs    Permanent unlock and completion authority
 
   Systems/
     AudioManager.cs          Procedural sound and music synthesis
-    HighScoreManager.cs      Session-only per-mode bests (zero each launch)
+    HighScoreManager.cs      Session-only per-mode bests and times
     InputHandler.cs          Keyboard-to-command mapping
+    ProgressionStore.cs      JSON persistence for permanent unlocks
     ScoreManager.cs          Score, streak, accuracy statistics and 100-point clamp
     SettingsManager.cs       JSON settings persistence
     SpawnManager.cs          Three-lane spawn fairness and mode-specific mixes
-    WordManager.cs           Validated word pools, distinct Tank words
+    WordManager.cs           Validated single-token word pools, distinct Tank words
 
   Entities/
     Enemy.cs                 Abstract enemy base and shared pipeline
@@ -298,7 +300,7 @@ TypingDead/
     PixelBackground.cs       Shared pixel-art background
 
   Tests/
-    SelfTest.cs              177-check headless rules verification
+    SelfTest.cs              183-check headless rules verification
 ```
 
 There are no `.Designer.cs` files and no `TextBox` controls. Every screen is custom-painted on a `VirtualScreenPanel`.
@@ -322,7 +324,8 @@ MainForm
             -> WordManager
        -> GameRenderer        presentation only
        -> EffectManager       visual effects
-  -> ProgressionManager       unlocks/reset
+  -> ProgressionManager       permanent unlocks/completions
+  -> ProgressionStore         saved unlock progress
   -> AudioManager / SettingsManager / HighScoreManager
 ```
 
@@ -360,9 +363,10 @@ The four exact comments are present in the source:
 
 - **GameManager** — the only rules authority. It validates target selection, matches typed input, gates Enter submission, applies life penalties, advances Tank words, launches one projectile, clamps score, and raises the end event once.
 - **Enemy / TankEnemy** — own health segments, current word index, incoming-attack reservation, movement, and pixel body drawing.
-- **WordManager** — owns mode word pools, validates lengths and characters, avoids immediate repeats, and returns three distinct Tank words.
-- **SpawnManager** — chooses eligible lanes only, respects per-mode enemy caps, and applies the mode-specific zombie mix.
-- **ProgressionManager** — owns unlock and reset rules; UI panels ask it for state instead of recalculating progression.
+- **WordManager** — owns mode word pools, validates single-token lengths and characters, avoids immediate repeats, and returns three distinct Tank words.
+- **SpawnManager** — chooses eligible lanes only, respects per-mode enemy caps, and applies the mode-specific zombie mix. Medium and Hard exclude Tanks.
+- **ProgressionManager** — owns permanent unlock and completion state; UI panels ask it for state instead of recalculating progression.
+- **ProgressionStore** — loads and saves unlock progress so a restart never relocks a mode.
 - **GameRenderer** — draws the HUD, lanes, enemies, word tags, typed console, pause overlay, and end banners from read-only game state.
 - **ResultPanel** — displays the report for a completed mode, a game over, or final victory.
 
@@ -375,11 +379,12 @@ The game writes these files under:
 ```text
 %AppData%\TypingDead\settings.json
 %AppData%\TypingDead\highscores.json
+%AppData%\TypingDead\progress.json
 ```
 
-`settings.json` persists across launches. `highscores.json` is written while the current session runs but is intentionally **not loaded at startup**, so personal bests and best times begin at zero on every launch. Best scores are kept separately for Easy, Medium, and Hard, capped at **100**, and best times are stored in milliseconds for each mode.
+`settings.json` and `progress.json` persist across launches. `highscores.json` is written while the current session runs but is intentionally **not loaded at startup**, so personal bests and best times begin at zero on every launch. Best scores are kept separately for Easy, Medium, and Hard, capped at **100**, and best times are stored in milliseconds for each mode.
 
-Progression is deliberately kept in memory for the current application session. Closing and reopening the game returns to a fresh **Easy-only** state.
+`progress.json` stores the unlocked and completed flags for all three modes. Unlocks are permanent: a failed run, a replay, or a restart cannot relock a mode. Missing or invalid progress data falls back to a fresh **Easy-only** state.
 
 ---
 
@@ -394,11 +399,11 @@ TypingDead.exe --selftest
 The self-test uses the real rules API and deterministic seeds. It covers:
 
 1. Exactly three lanes, 100-point target, and three starting lives.
-2. Enter/arrow/letter/Space key mapping.
-3. Easy, Medium, and Hard word-length validation, including the 5-9 Medium range.
-4. Single-space acceptance and rejection of leading, trailing, or doubled spaces.
-5. Space-key typing of multi-word Hard terms through the real rules API.
-6. Hard mode requiring every word to be at least 10 characters.
+2. Enter/arrow/letter key mapping.
+3. Easy (3-5), Medium (5-6), and Hard (7-9) word-length validation.
+4. Single-token pool validation with no spaces anywhere.
+5. Every pool entry being an uppercase A-Z term inside its mode limit.
+6. Hard mode requiring every word to be 7-9 characters.
 7. Tank three-word distinctness and three-health-segment sequencing.
 8. Hard Runners having one health segment and dying to one correct word.
 9. A Hard Runner breach costing exactly one life.
@@ -412,8 +417,8 @@ The self-test uses the real rules API and deterministic seeds. It covers:
 17. Score clamping at 100 and one-shot completion.
 18. Easy completion not awarding Final Victory.
 19. Hard completion awarding Final Victory.
-20. Progression unlock/reset rules and replay state.
-21. Spawn lanes, enemy caps, and Tank/Special word counts.
+20. Permanent progression: failures keep unlocks, and saved unlocks survive a restart.
+21. Spawn lanes, enemy caps, Medium/Hard Tank exclusion, and word counts.
 22. ScoreManager arithmetic and accuracy.
 23. Special Zombie two-hit durability.
 
@@ -423,8 +428,8 @@ All required screens were rendered to 1280x720 captures during the final pass:
 
 - Main menu with the exact required footer.
 - Difficulty screen in locked and unlocked states.
-- Gameplay with a Tank target, three health segments, a completed word, and `WORD READY: PRESS ENTER`.
-- Hard gameplay with a spaced term (`BINARY TREES`) showing visible Space markers in the word boxes.
+- Gameplay with a completed Medium word and `WORD READY: PRESS ENTER`.
+- Hard gameplay with a single-token 7-9 character term and `WORD READY: PRESS ENTER`.
 - Pause overlay.
 - Settings.
 - How to Play.
@@ -439,9 +444,9 @@ The final pass also fixed two layout issues found in those captures: a misplaced
 ## Limitations and known constraints
 
 - **Windows only.** WinForms and GDI+.
-- **Latin typing only.** Input is mapped from A-Z plus a single Space between words. IME composition, dead keys, and non-Latin scripts are not supported.
+- **Latin typing only.** Input is mapped from A-Z. No assigned word contains a space; IME composition, dead keys, and non-Latin scripts are not supported.
 - **Fixed virtual resolution.** The 1280x720 canvas scales and letterboxes rather than reflowing.
-- **Session-only progression and records.** Unlocks, personal bests, and best times reset on a fresh launch; settings persist.
+- **Permanent progression, session-only records.** Unlocks and completion badges persist; personal bests and best times reset on a fresh launch.
 - **No online services.** No account, cloud sync, or online leaderboard.
 - **No mid-run save.** Pause freezes the current run; closing the application ends it.
 - **Simple audio backend.** `SoundPlayer` handles sound effects while a separate MCI channel plays looping music.
@@ -453,8 +458,9 @@ The final pass also fixed two layout issues found in those captures: a misplaced
 ## Reset and troubleshooting
 
 - Delete `%AppData%\TypingDead\settings.json` to reset settings.
+- Delete `%AppData%\TypingDead\progress.json` to reset unlocks and completion badges to **Easy only**.
 - Best scores and best times are session-only; `highscores.json` is not loaded on startup.
-- Delete the whole `%AppData%\TypingDead` folder to reset settings and the saved session file.
+- Delete the whole `%AppData%\TypingDead` folder to reset settings, unlocks, and the saved session file.
 - If audio is silent, check the in-game Settings toggles and the Windows playback device.
 - If the game pauses unexpectedly, another window took focus. This is intentional and prevents breaches while you are away.
 - If a build cannot replace the root executable, close any running copy and run `build.bat` again.

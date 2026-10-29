@@ -81,8 +81,9 @@ namespace TypingDead.Systems
 
             if (difficulty == GameDifficulty.Medium)
             {
+                // Medium has no Tanks. The old Tank share becomes Walkers,
+                // leaving a mix of fast Runners and steady Walkers.
                 if (roll < 0.30) return EnemyType.Runner;
-                if (roll < 0.46) return EnemyType.Tank;
                 return EnemyType.Walker;
             }
 

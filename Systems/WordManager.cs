@@ -28,39 +28,63 @@ namespace TypingDead.Systems
                 "ARRAY", "STACK", "QUEUE", "GRAPH", "TREE", "NODE", "DATA", "LIST",
                 "HEAP", "LINK", "SORT", "LOOP", "BYTE", "CODE", "FILE", "CHIP",
                 "CORE", "DISK", "PATH", "PORT", "ROOT", "LEAF", "EDGE", "BIT",
-                "RAM", "CPU", "API", "BUS", "KEY", "MAP", "SET"
+                "RAM", "CPU", "API", "BUS", "KEY", "MAP", "SET", "CACHE", "QUERY",
+                "TABLE", "TOKEN", "PIXEL", "LOGIC", "CLASS", "FIELD", "CLOUD",
+                "CABLE", "FLASH", "DRIVE", "MODEM", "PATCH", "DEBUG", "VIRUS",
+                "LOGIN", "ADMIN", "MOUNT", "PARSE", "PRINT", "STORE", "FRAME",
+                "SLICE", "ROUTE"
             };
 
-            // Medium terms: 5-9 characters. Includes spaced two-word terms,
-            // which are typed with a real Space key.
+            // Medium terms: 5-6 characters. Every entry is a single IT token,
+            // so no mode ever requires the Space key.
             _words[GameDifficulty.Medium] = new string[]
             {
-                "ALGORITHM", "POINTER", "BINARY", "SEARCH", "LINKED", "INSERT",
-                "DELETE", "MEMORY", "LINEAR", "SORTING", "INDEX", "MERGE",
-                "ARRAYS", "QUEUES", "STACKS", "TABLES", "RECURSE", "HASHING",
-                "ENCRYPT", "NETWORK", "SERVER", "CLIENT", "ROUTER", "CIPHER",
-                "QUEUED", "STACKED", "LINKING", "SORTED",
-                "HASH MAP", "HASH SET", "BIT MASK", "DATA SET", "KEY PAIR",
-                "TREE NODE", "LINK NODE", "BASE CASE", "STACK TOP", "TREE ROOT",
-                "LEAF NODE", "MAIN LOOP", "SORT KEY", "HARD DISK", "CODE BASE",
-                "TEST CASE", "USE CASE", "BIG DATA", "OPEN API", "BUG FIX",
-                "LOW BIT"
+                "CACHE", "QUERY", "TABLE", "TUPLE", "TOKEN", "CLASS", "FIELD",
+                "PIXEL", "LOGIC", "CLOUD", "LINUX", "BATCH", "FLASH", "DRIVE",
+                "MODEM", "PATCH", "DEBUG", "VIRUS", "LOGIN", "ADMIN", "MOUNT",
+                "PARSE", "PRINT", "STORE", "FRAME", "SLICE", "INDEX", "MERGE",
+                "ARRAY", "STACK", "QUEUE", "GRAPH", "CABLE", "ROUTE", "BINARY",
+                "SEARCH", "INSERT", "DELETE", "MEMORY", "LINEAR", "SORTED",
+                "ARRAYS", "QUEUES", "STACKS", "TABLES", "HASHES", "ENCODE",
+                "DECODE", "CIPHER", "PACKET", "SOCKET", "SERVER", "CLIENT",
+                "ROUTER", "SWITCH", "DOMAIN", "KERNEL", "THREAD", "VECTOR",
+                "MATRIX", "SCHEMA", "BUFFER", "STREAM", "STRING", "OBJECT",
+                "METHOD", "SYNTAX", "COOKIE", "MODULE", "ACCESS", "UPDATE",
+                "RECORD", "COLUMN", "VALUES", "SOURCE", "TARGET", "SIGNAL",
+                "LINKED", "BITMAP", "ONLINE", "BACKUP", "SUBNET", "HEADER",
+                "FOOTER"
             };
 
-            // Hard terms: every entry is 10-18 characters. Spaces are typed
-            // with the Space key, so full data-structure names stay readable.
+            // Hard terms: 7-9 characters. Single tokens only, so complete
+            // data-structure vocabulary never needs a Space.
             _words[GameDifficulty.Hard] = new string[]
             {
-                "LINKED LIST", "BINARY TREE", "HASH TABLE", "BINARY HEAP",
-                "SINGLY LINKED LIST", "DOUBLY LINKED LIST", "BINARY SEARCH TREE",
-                "PRIORITY QUEUE", "CIRCULAR QUEUE", "HASH FUNCTION", "CALL STACK",
-                "STACK TRACE", "DYNAMIC ARRAY", "DIRECTED GRAPH", "WEIGHTED GRAPH",
-                "ADJACENCY LIST", "LINKED LIST NODE", "BINARY TREE NODE",
-                "DATA STRUCTURE", "TIME COMPLEXITY", "SPACE COMPLEXITY",
-                "DEPTH FIRST", "BREADTH FIRST", "HASH TABLES", "BINARY TREES",
-                "LINKED LISTS", "SORTING ALGORITHM", "SEARCH ALGORITHM",
-                "GRAPH TRAVERSAL", "TREE TRAVERSAL", "MUTUAL RECURSION",
-                "TAIL RECURSION"
+                "POINTER", "NETWORK", "STORAGE", "PROCESS", "PROGRAM", "COMPILE",
+                "BOOLEAN", "INTEGER", "DECIMAL", "GRAPHIC", "MONITOR", "ENCRYPT",
+                "DECRYPT", "HASHING", "SORTING", "LINKING", "MAPPING", "PARSING",
+                "TESTING", "MALWARE", "ROUTING", "PACKETS", "SOCKETS", "THREADS",
+                "KERNELS", "BUFFERS", "STREAMS", "VECTORS", "SCHEMAS", "QUERIES",
+                "COLUMNS", "RECORDS", "OBJECTS", "METHODS", "CLASSES", "MODULES",
+                "RUNTIME", "COMPUTE", "MACHINE", "DIGITAL", "VIRTUAL", "HEAPIFY",
+                "SUBTREE", "SIBLING", "BREADTH", "WEBSITE", "DESKTOP", "NETBOOK",
+                "BITWISE", "BROWSER", "COOKIES", "SERVERS", "CLIENTS", "ROUTERS",
+                "DOMAINS", "COMMAND", "LOGICAL", "INHERIT", "MUTABLE", "FUNCTION",
+                "VARIABLE", "KEYBOARD", "DATABASE", "SECURITY", "DEBUGGER",
+                "COMPILER", "TERMINAL", "INTERNET", "ETHERNET", "FIRMWARE",
+                "HARDWARE", "SOFTWARE", "PROTOCOL", "PASSWORD", "FIREWALL",
+                "MATRICES", "ALLOCATE", "ASSEMBLY", "ENCODING", "DECODING",
+                "POINTERS", "INTEGERS", "DECIMALS", "QUERYING", "INDEXING",
+                "DELETION", "ANCESTOR", "CHILDREN", "CHECKSUM", "TRANSFER",
+                "DOWNLOAD", "WIRELESS", "COMPUTER", "MESSAGES", "DATASETS",
+                "BOOLEANS", "OVERRIDE", "INSTANCE", "TEMPLATE", "GENERICS",
+                "DEADLOCK", "REGISTER", "PHYSICAL", "ABSTRACT", "ENCODERS",
+                "DECODERS", "ALGORITHM", "RECURSION", "ITERATION", "TRAVERSAL",
+                "OPERATION", "ALLOCATOR", "AGGREGATE", "COMPILING", "DEBUGGING",
+                "PROCESSOR", "INTERFACE", "BANDWIDTH", "FREQUENCY", "PROTOCOLS",
+                "ENCRYPTED", "BACKTRACK", "STRUCTURE", "PARAMETER", "STATEMENT",
+                "CONDITION", "FUNCTIONS", "VARIABLES", "CONSTANTS", "DATABASES",
+                "SEARCHING", "INSERTION", "NAMESPACE", "REFERENCE", "IMMUTABLE",
+                "SERIALIZE", "SCHEDULER", "MULTITASK", "SEMAPHORE", "PROCESSES"
             };
 
             foreach (GameDifficulty difficulty in _words.Keys)
@@ -84,16 +108,10 @@ namespace TypingDead.Systems
             Queue<string> recent = _recent[difficulty];
             string chosen = null;
 
-            // Hard-mode Runners are the replacement threat for Tanks and
-            // Specials, so they draw from the longer end of the Hard pool.
-            int minimumLength = difficulty == GameDifficulty.Hard && type == EnemyType.Runner
-                ? 13 : 0;
-
             for (int attempt = 0; attempt < 160; attempt++)
             {
                 string candidate = pool[_random.Next(pool.Length)];
                 if (!ValidateWord(difficulty, candidate)) continue;
-                if (candidate.Length < minimumLength) continue;
                 if (recent.Contains(candidate) && recent.Count < pool.Length - 1) continue;
                 chosen = candidate;
                 break;
@@ -104,7 +122,7 @@ namespace TypingDead.Systems
                 // Deterministic fallback that still respects the length rule.
                 for (int i = 0; i < pool.Length; i++)
                 {
-                    if (ValidateWord(difficulty, pool[i]) && pool[i].Length >= minimumLength)
+                    if (ValidateWord(difficulty, pool[i]))
                     {
                         chosen = pool[i];
                         break;
@@ -121,8 +139,14 @@ namespace TypingDead.Systems
             return chosen;
         }
 
+        /// <summary>Returns a copy of a mode pool for verification and tooling.</summary>
+        public string[] GetPool(GameDifficulty difficulty)
+        {
+            return (string[])_words[difficulty].Clone();
+        }
+
         /// <summary>
-        /// Returns distinct words for multi-word enemies such as the Tank and
+        /// Returns distinct words for multi-hit enemies such as the Tank and
         /// the mutated Special Zombie.
         /// </summary>
         public string[] GetWords(GameDifficulty difficulty, EnemyType type, int count)
@@ -152,20 +176,13 @@ namespace TypingDead.Systems
         public bool ValidateWord(GameDifficulty difficulty, string word)
         {
             if (String.IsNullOrEmpty(word)) return false;
-            if (word[0] == ' ' || word[word.Length - 1] == ' ') return false;
 
-            bool previousWasSpace = false;
+            // Every assigned term is a single A-Z token. Spaces and
+            // punctuation are rejected because no mode uses multi-word terms.
             for (int i = 0; i < word.Length; i++)
             {
                 char c = word[i];
-                if (c == ' ')
-                {
-                    if (previousWasSpace) return false;
-                    previousWasSpace = true;
-                    continue;
-                }
                 if (c < 'A' || c > 'Z') return false;
-                previousWasSpace = false;
             }
 
             if (difficulty == GameDifficulty.Easy)
@@ -174,9 +191,9 @@ namespace TypingDead.Systems
             }
             if (difficulty == GameDifficulty.Medium)
             {
-                return word.Length >= 5 && word.Length <= 9;
+                return word.Length >= 5 && word.Length <= 6;
             }
-            return word.Length >= 10 && word.Length <= 18;
+            return word.Length >= 7 && word.Length <= 9;
         }
 
         private void Remember(GameDifficulty difficulty, string word)

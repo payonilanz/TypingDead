@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using TypingDead.Effects;
@@ -118,30 +119,19 @@ namespace TypingDead.Tests
             }
 
             Check("Easy words are 3-5 letters", easyValid);
-            Check("Medium words are 5-9 letters", mediumValid);
-            Check("Hard words are 10-18 letters", hardValid);
+            Check("Medium words are 5-6 letters", mediumValid);
+            Check("Hard words are 7-9 letters", hardValid);
 
-            bool mediumSpaced = false;
-            for (int i = 0; i < 1200; i++)
-            {
-                string candidate = words.GetWord(GameDifficulty.Medium, EnemyType.Walker);
-                if (candidate.IndexOf(' ') >= 0)
-                {
-                    mediumSpaced = true;
-                    break;
-                }
-            }
-            Check("Medium pool includes spaced terms", mediumSpaced);
-            Check("Spaced Medium term is accepted",
-                words.ValidateWord(GameDifficulty.Medium, "HASH MAP"));
-
-            bool hardRunnerLong = true;
-            for (int i = 0; i < 240; i++)
-            {
-                string runnerWord = words.GetWord(GameDifficulty.Hard, EnemyType.Runner);
-                if (runnerWord.Length < 13) hardRunnerLong = false;
-            }
-            Check("Hard Runner words are longer terms", hardRunnerLong);
+            Check("Easy pool contains only 3-5 letter tokens",
+                PoolObeys(words, GameDifficulty.Easy, 3, 5));
+            Check("Medium pool contains only 5-6 letter tokens",
+                PoolObeys(words, GameDifficulty.Medium, 5, 6));
+            Check("Hard pool contains only 7-9 letter tokens",
+                PoolObeys(words, GameDifficulty.Hard, 7, 9));
+            Check("Medium pool has no spaced terms",
+                NoSpaces(words.GetPool(GameDifficulty.Medium)));
+            Check("Hard pool has no spaced terms",
+                NoSpaces(words.GetPool(GameDifficulty.Hard)));
 
             string[] tankWords = words.GetWords(GameDifficulty.Medium, EnemyType.Tank, 3);
             Check("Tank receives exactly three words", tankWords.Length == 3);
@@ -151,35 +141,56 @@ namespace TypingDead.Tests
             bool tankLengths = true;
             for (int i = 0; i < tankWords.Length; i++)
             {
-                if (tankWords[i].Length < 5 || tankWords[i].Length > 9) tankLengths = false;
+                if (tankWords[i].Length < 5 || tankWords[i].Length > 6) tankLengths = false;
             }
-            Check("Medium Tank words obey 5-9 length", tankLengths);
+            Check("Medium Tank words obey 5-6 length", tankLengths);
 
             string[] hardTank = words.GetWords(GameDifficulty.Hard, EnemyType.Tank, 3);
             bool hardTankLengths = true;
             for (int i = 0; i < hardTank.Length; i++)
             {
-                if (hardTank[i].Length < 10) hardTankLengths = false;
+                if (hardTank[i].Length < 7 || hardTank[i].Length > 9) hardTankLengths = false;
             }
-            Check("Every Hard Tank word is at least ten characters", hardTankLengths);
+            Check("Hard Tank words obey 7-9 length", hardTankLengths);
 
             Check("Lowercase words are rejected by validator",
                 !words.ValidateWord(GameDifficulty.Easy, "array"));
             Check("Punctuation is rejected by validator",
                 !words.ValidateWord(GameDifficulty.Hard, "LINKED-LIST"));
+            Check("Spaces are rejected by validator",
+                !words.ValidateWord(GameDifficulty.Hard, "LINKED LIST"));
             Check("Too-short Hard word is rejected",
                 !words.ValidateWord(GameDifficulty.Hard, "SHORT"));
-            Check("Single space between words is accepted",
-                words.ValidateWord(GameDifficulty.Hard, "LINKED LIST"));
-            Check("Leading space is rejected",
-                !words.ValidateWord(GameDifficulty.Hard, " LINKED LIST"));
-            Check("Trailing space is rejected",
-                !words.ValidateWord(GameDifficulty.Hard, "LINKED LIST "));
-            Check("Double space is rejected",
-                !words.ValidateWord(GameDifficulty.Hard, "LINKED  LIST"));
             Check("Word above the Medium limit is rejected",
                 !words.ValidateWord(GameDifficulty.Medium, "DATASTRUCTURE"));
+            Check("A valid Medium word is accepted",
+                words.ValidateWord(GameDifficulty.Medium, "BINARY"));
+            Check("A valid Hard word is accepted",
+                words.ValidateWord(GameDifficulty.Hard, "ALGORITHM"));
             Log.AppendLine();
+        }
+
+        private static bool PoolObeys(WordManager words, GameDifficulty difficulty,
+            int minimum, int maximum)
+        {
+            string[] pool = words.GetPool(difficulty);
+            if (pool.Length < 20) return false;
+            for (int i = 0; i < pool.Length; i++)
+            {
+                string word = pool[i];
+                if (!words.ValidateWord(difficulty, word)) return false;
+                if (word.Length < minimum || word.Length > maximum) return false;
+            }
+            return true;
+        }
+
+        private static bool NoSpaces(string[] pool)
+        {
+            for (int i = 0; i < pool.Length; i++)
+            {
+                if (pool[i].IndexOf(' ') >= 0) return false;
+            }
+            return true;
         }
 
         private static void TestEnemyMechanics()
@@ -267,7 +278,9 @@ namespace TypingDead.Tests
 
         private static void TestSpaceTyping(AudioManager audio, GameSettings settings)
         {
-            Log.AppendLine("[SPACE TYPING]");
+            Log.AppendLine("[SPACE INPUT COMPATIBILITY]");
+            // No mode assigns a spaced term. This keeps the legacy Space input
+            // path covered while every real pool word stays a single token.
             EffectManager effects = new EffectManager();
             GameManager game = new GameManager(GameDifficulty.Hard, settings, audio, effects, 107);
             game.DisableSpawningForTest();
@@ -562,18 +575,48 @@ namespace TypingDead.Tests
             Check("Hard completion marks all modes complete", progression.AllModesCompleted);
 
             progression.Fail(GameDifficulty.Medium);
-            Check("Failure reopens Easy", progression.IsUnlocked(GameDifficulty.Easy));
-            Check("Failure locks Medium", !progression.IsUnlocked(GameDifficulty.Medium));
-            Check("Failure locks Hard", !progression.IsUnlocked(GameDifficulty.Hard));
-            Check("Failure clears completion records",
-                !progression.IsCompleted(GameDifficulty.Easy) &&
-                !progression.IsCompleted(GameDifficulty.Medium) &&
-                !progression.IsCompleted(GameDifficulty.Hard));
+            Check("Failure keeps Easy unlocked", progression.IsUnlocked(GameDifficulty.Easy));
+            Check("Failure keeps Medium unlocked", progression.IsUnlocked(GameDifficulty.Medium));
+            Check("Failure keeps Hard unlocked", progression.IsUnlocked(GameDifficulty.Hard));
+            Check("Failure keeps completion records",
+                progression.IsCompleted(GameDifficulty.Easy) &&
+                progression.IsCompleted(GameDifficulty.Medium) &&
+                progression.IsCompleted(GameDifficulty.Hard));
 
             progression.Reset();
-            Check("Reset restores fresh progression", progression.IsUnlocked(GameDifficulty.Easy) &&
+            Check("Explicit reset restores fresh progression", progression.IsUnlocked(GameDifficulty.Easy) &&
                 !progression.IsUnlocked(GameDifficulty.Medium) &&
                 !progression.IsUnlocked(GameDifficulty.Hard));
+
+            string folder = Path.Combine(Path.GetTempPath(), "TypingDeadSelfTest");
+            string path = Path.Combine(folder, "progress.json");
+            try
+            {
+                if (File.Exists(path)) File.Delete(path);
+                ProgressionManager saved = new ProgressionManager(new ProgressionStore(path));
+                saved.Complete(GameDifficulty.Easy);
+                saved.Complete(GameDifficulty.Medium);
+
+                ProgressionManager reloaded = new ProgressionManager(new ProgressionStore(path));
+                Check("Unlocks survive an application restart",
+                    reloaded.IsUnlocked(GameDifficulty.Easy) &&
+                    reloaded.IsUnlocked(GameDifficulty.Medium) &&
+                    reloaded.IsUnlocked(GameDifficulty.Hard));
+                Check("Completion badges survive an application restart",
+                    reloaded.IsCompleted(GameDifficulty.Easy) &&
+                    reloaded.IsCompleted(GameDifficulty.Medium));
+
+                reloaded.Fail(GameDifficulty.Hard);
+                ProgressionManager afterLoss = new ProgressionManager(new ProgressionStore(path));
+                Check("A lost run never removes saved unlocks",
+                    afterLoss.IsUnlocked(GameDifficulty.Medium) &&
+                    afterLoss.IsUnlocked(GameDifficulty.Hard));
+            }
+            finally
+            {
+                if (File.Exists(path)) File.Delete(path);
+                if (Directory.Exists(folder)) Directory.Delete(folder, true);
+            }
             Log.AppendLine();
         }
 
@@ -586,7 +629,9 @@ namespace TypingDead.Tests
             bool wordsValid = true;
             bool hardLengths = true;
             bool hardNoTanksOrSpecials = true;
-            bool hardRunnerLong = true;
+            bool mediumNoTanksOrSpecials = true;
+            bool mediumHasWalkers = false;
+            bool mediumHasRunners = false;
             int hardRunners = 0;
             List<Enemy> active = new List<Enemy>();
             GameDifficulty[] modes = new GameDifficulty[]
@@ -606,18 +651,27 @@ namespace TypingDead.Tests
                         wordsValid = false;
                     if (enemy.Type == EnemyType.Special && (enemy.WordCount != 2 || enemy.Health != 2))
                         wordsValid = false;
-                    if (modes[m] == GameDifficulty.Hard && enemy.Word.Length < 10) hardLengths = false;
+                    if (modes[m] == GameDifficulty.Medium)
+                    {
+                        if (enemy.Type == EnemyType.Tank || enemy.Type == EnemyType.Special)
+                        {
+                            mediumNoTanksOrSpecials = false;
+                        }
+                        if (enemy.Type == EnemyType.Walker) mediumHasWalkers = true;
+                        if (enemy.Type == EnemyType.Runner) mediumHasRunners = true;
+                    }
+                    if (modes[m] == GameDifficulty.Hard &&
+                        (enemy.Word.Length < 7 || enemy.Word.Length > 9))
+                    {
+                        hardLengths = false;
+                    }
                     if (modes[m] == GameDifficulty.Hard)
                     {
                         if (enemy.Type == EnemyType.Tank || enemy.Type == EnemyType.Special)
                         {
                             hardNoTanksOrSpecials = false;
                         }
-                        if (enemy.Type == EnemyType.Runner)
-                        {
-                            hardRunners++;
-                            if (enemy.Word.Length < 13) hardRunnerLong = false;
-                        }
+                        if (enemy.Type == EnemyType.Runner) hardRunners++;
                     }
                     enemy.Update(0.5f, 0f);
                     active.Clear();
@@ -626,10 +680,12 @@ namespace TypingDead.Tests
 
             Check("Spawner only uses the three valid lanes", lanesValid);
             Check("Tank and Special spawn with correct word/health counts", wordsValid);
-            Check("Hard spawns never assign a word below ten letters", hardLengths);
+            Check("Medium spawns exclude Tanks and Specials", mediumNoTanksOrSpecials);
+            Check("Medium still sends Walker Zombies", mediumHasWalkers);
+            Check("Medium still sends Runner waves", mediumHasRunners);
+            Check("Hard spawns keep words within 7-9 letters", hardLengths);
             Check("Hard spawns exclude Tanks and Specials", hardNoTanksOrSpecials);
             Check("Hard sends a Runner-heavy mix", hardRunners >= 20);
-            Check("Hard Runner spawns use longer terms", hardRunnerLong);
 
             List<Enemy> crowded = new List<Enemy>();
             crowded.Add(new WalkerEnemy(0, "STACK"));
@@ -686,15 +742,15 @@ namespace TypingDead.Tests
         private static void TestSpecialZombie()
         {
             Log.AppendLine("[SPECIAL ZOMBIE]");
-            string[] words = new string[] { "BINARY SEARCH TREE", "SINGLY LINKED LIST" };
+            string[] words = new string[] { "ALGORITHM", "RECURSION" };
             SpecialZombie special = new SpecialZombie(2, words);
             Check("Special has two health segments", special.MaxHealth == 2);
-            Check("Special has two long words", special.WordCount == 2);
+            Check("Special has two distinct terms", special.WordCount == 2);
             special.Update(0.5f, 100f);
             special.ReserveForAttack();
             bool killed = special.ApplyHit();
             Check("First Special hit is not lethal", !killed && special.Health == 1);
-            Check("Special advances to its second word", special.Word == "SINGLY LINKED LIST");
+            Check("Special advances to its second word", special.Word == "RECURSION");
             special.ReserveForAttack();
             Check("Second Special hit kills", special.ApplyHit());
             Check("Special is worth more than a standard Walker",

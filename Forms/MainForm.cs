@@ -49,7 +49,7 @@ namespace TypingDead.Forms
             _settingsManager = new SettingsManager();
             _highScores = new HighScoreManager();
             _audio = new AudioManager(_settingsManager.Settings);
-            _progression = new ProgressionManager();
+            _progression = new ProgressionManager(new ProgressionStore());
 
             Text = "TYPING DEAD // Pixel Typing Survival";
             StartPosition = FormStartPosition.CenterScreen;
@@ -181,9 +181,11 @@ namespace TypingDead.Forms
             }
             else
             {
+                // Unlocks are permanent, so a loss never sends the player back
+                // to Easy or clears a completion badge.
                 _progression.Fail(result.Difficulty);
-                _lastDifficulty = GameDifficulty.Easy;
-                _difficultyNotice = "PROGRESSION RESET // EASY IS UNLOCKED";
+                _lastDifficulty = result.Difficulty;
+                _difficultyNotice = "RUN FAILED // UNLOCKS KEPT";
                 kind = ResultKind.GameOver;
                 notice = _difficultyNotice;
             }
@@ -240,14 +242,13 @@ namespace TypingDead.Forms
 
             if (_result.Kind == ResultKind.FinalVictory)
             {
-                _progression.Reset();
-                _difficultyNotice = "FRESH START // EASY IS UNLOCKED";
+                _difficultyNotice = "ALL MODES COMPLETE // UNLOCKS KEPT";
                 ShowDifficulty(_difficultyNotice);
                 return;
             }
 
-            // Game over. Retry the failed mode only when progression still
-            // allows it; otherwise the player must earn the unlock again.
+            // Game over. The failed mode stays unlocked, so Retry is always
+            // available and never depends on re-earning progression.
             GameDifficulty difficulty = _lastResult == null
                 ? GameDifficulty.Easy
                 : _lastResult.Difficulty;

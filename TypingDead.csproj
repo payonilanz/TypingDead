@@ -73,6 +73,7 @@
     <Compile Include="Systems\AudioManager.cs" />
     <Compile Include="Systems\HighScoreManager.cs" />
     <Compile Include="Systems\InputHandler.cs" />
+    <Compile Include="Systems\ProgressionStore.cs" />
     <Compile Include="Systems\ScoreManager.cs" />
     <Compile Include="Systems\SettingsManager.cs" />
     <Compile Include="Systems\SpawnManager.cs" />

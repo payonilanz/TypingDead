@@ -141,7 +141,7 @@ namespace TypingDead.Forms
             }
             else
             {
-                DrawingHelper.DrawText(g, "A FAILED RUN RELOCKS LATER MODES",
+                DrawingHelper.DrawText(g, "UNLOCKS STAY SAVED ON THIS DEVICE",
                     UiFonts.Mono(7f, FontStyle.Regular), Palette.SecondaryText,
                     new RectangleF(0f, 592f, GameConfig.VirtualWidth, 18f),
                     StringAlignment.Center, StringAlignment.Center);
@@ -207,13 +207,10 @@ namespace TypingDead.Forms
                 new RectangleF(card.X + 20f, card.Y + 116f, card.Width - 40f, 34f),
                 StringAlignment.Near, StringAlignment.Near);
 
-            DrawInfoRow(g, card, 158f, "ENEMIES", tuning.ZombieSummary, accent);
-            DrawInfoRow(g, card, 196f, "CHARS", tuning.MinimumWordLength.ToString() + "-" +
-                tuning.MaximumWordLength.ToString(), accent);
-            DrawInfoRow(g, card, 234f, "BEST",
+            DrawInfoRow(g, card, 186f, "BEST",
                 completed ? "COMPLETED" : _highScores.GetBest(difficulty).ToString("000") + " / 100",
                 accent);
-            DrawInfoRow(g, card, 272f, "BEST TIME",
+            DrawInfoRow(g, card, 240f, "BEST TIME",
                 HighScoreManager.FormatTime(_highScores.GetBestTimeMs(difficulty)),
                 accent);
 
@@ -236,7 +233,7 @@ namespace TypingDead.Forms
             }
             DrawingHelper.DrawText(g, status, UiFonts.Mono(8.5f, FontStyle.Bold),
                 unlocked ? Palette.Success : Palette.Blood,
-                new RectangleF(card.X + 20f, card.Y + 304f, card.Width - 40f, 18f),
+                new RectangleF(card.X + 20f, card.Y + 300f, card.Width - 40f, 18f),
                 StringAlignment.Near, StringAlignment.Center);
 
             if (!unlocked)
